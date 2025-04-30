@@ -24,7 +24,7 @@ def register_view(request):
     
     return HttpResponseBadRequest("Method not allowed")
 
-
+@csrf_exempt
 def login_view(request):
     if request.method == 'POST':
         username = request.POST.get('username')
@@ -33,7 +33,7 @@ def login_view(request):
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
-            return JsonResponse({'success': True, 'redirect_url': '/'})
+            return JsonResponse({'success': True, 'redirect_url': '/home/'})
         else:
             return JsonResponse({'success': False, 'errors': ['Invalid username or password.']})
     
@@ -41,3 +41,9 @@ def login_view(request):
         return render(request, 'login.html')
     
     return HttpResponseBadRequest("Method not allowed")
+
+def home_view(request):
+    if request.user.is_authenticated:
+        return render(request, 'home.html')
+    else:
+        return render(request, 'login.html')

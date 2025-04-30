@@ -1,0 +1,34 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Chats</title>
+  <link rel="stylesheet" href="{% static 'css/home.css' %}">
+</head>
+<body>
+  <div class="chat-container">
+    <div class="header">
+      <div class="header-left">
+        <img id="add-chat-icon" src="{% static 'image/plus.png' %}" alt="Add Chat">
+      </div>
+      <h1>Chats</h1>
+      <div class="header-right">
+        <img src="{% static 'image/filter.png' %}" alt="Filter" id="filterIcon">
+        <div id="filterOptions" class="filter-options">
+          <button id="sortAZ">A-Z</button>
+          <button id="sortTime">Time</button>
+        </div>
+        <img src="{% static 'image/search.png' %}" alt="Search" id="searchIcon">
+        <input type="text" id="searchInput" placeholder="Search" class="search-input">
+      </div>
+    </div>
+
+    <div class="chat-list" id="chatList">
+      <!-- Chats will be inserted here -->
+    </div>
+  </div>
+
+  <script type="module" src="{% static 'js/home.js' %}"></script>
+</body>
+</html>
