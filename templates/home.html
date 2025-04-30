@@ -10,7 +10,8 @@
   <div class="chat-container">
     <div class="header">
       <div class="header-left">
-        <img id="add-chat-icon" src="{% static 'image/plus.png' %}" alt="Add Chat">
+        <img id="add-chat-icon" src="{% static 'image/plus.png' %}" alt="Add Chat" data-add-button-url="{% url 'add_button' %}">
+        <!-- <img id="add-chat-icon" src="{% static 'image/plus.png' %}" alt="Add Chat"> -->
       </div>
       <h1>Chats</h1>
       <div class="header-right">
