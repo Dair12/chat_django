@@ -1,0 +1,24 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Login</title>
+  <link rel="stylesheet" href="{% static 'css/login.css' %}">
+</head>
+<body>
+  <div class="login-box">
+    <h1>Login</h1>
+    <form id="login-form" action="{% url 'login' %}" method="post">
+      {% csrf_token %}
+      <input name="username" type="text" placeholder="Username or email"><br>
+      <input name="password" type="password" placeholder="Password"><br>
+      <button type="submit">Login</button>
+    </form>
+    <div id="login-error-box"></div>
+    <a class="register-link" href="{% url 'register' %}">Register</a>
+  </div>
+
+  <script src="{% static 'js/login.js' %}"></script>
+</body>
+</html>
