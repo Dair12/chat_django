@@ -20,15 +20,18 @@
       <input type="text" class="name-of-member" id="memberInput" placeholder="Search members">
     </div>
     <div class="member-list" id="memberList">
-      {% for friend in friends %}
-        <div class="friend-item" data-username="{{ friend.contact.username }}">
-          <input type="checkbox" class="friend-checkbox" value="{{ friend.contact.username }}">
-          <span>{{ friend.contact.username }}</span>
-        </div>
-      {% empty %}
-        <p>No friends found.</p>
-      {% endfor %}
-    </div>
+        {% for friend in friends %}
+          <div class="member-item" data-username="{{ friend.contact.username }}">
+            <img src="{% static 'image/default_user_avatar.webp' %}" class="avatar" alt="User Avatar">
+            <label style="display:flex;align-items:center;gap:8px;">
+              <input type="checkbox" class="friend-checkbox" value="{{ friend.contact.username }}">
+              <span class="name">{{ friend.contact.username }}</span>
+            </label>
+          </div>
+        {% empty %}
+          <p>No friends found.</p>
+        {% endfor %}
+      </div>      
   </div>
   <script type="module" src="{% static 'js/create_group.js' %}"></script>
 </body>

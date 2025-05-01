@@ -8,7 +8,7 @@ let members = [];
 // Filter friends based on search input
 memberInput.addEventListener('input', () => {
     const searchTerm = memberInput.value.toLowerCase();
-    const friendItems = memberList.getElementsByClassName('friend-item');
+    const friendItems = memberList.getElementsByClassName('member-item');
 
     Array.from(friendItems).forEach(item => {
         const username = item.dataset.username.toLowerCase();
