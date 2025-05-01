@@ -17,10 +17,17 @@
       <input type="text" class="name-of-group" id="groupName" placeholder="Name of group">
     </div>
     <div class="group-name-container">
-      <input type="text" class="name-of-member" id="memberInput" placeholder="Name of member">
+      <input type="text" class="name-of-member" id="memberInput" placeholder="Search members">
     </div>
     <div class="member-list" id="memberList">
-      <!-- Friends will be loaded here -->
+      {% for friend in friends %}
+        <div class="friend-item" data-username="{{ friend.contact.username }}">
+          <input type="checkbox" class="friend-checkbox" value="{{ friend.contact.username }}">
+          <span>{{ friend.contact.username }}</span>
+        </div>
+      {% empty %}
+        <p>No friends found.</p>
+      {% endfor %}
     </div>
   </div>
   <script type="module" src="{% static 'js/create_group.js' %}"></script>
