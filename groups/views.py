@@ -1,5 +1,7 @@
 from django.shortcuts import render
 
-# Create your views here.
 def add_group(request):
-    pass
+    if request.user.is_authenticated:
+        return render(request, 'add_group.html')
+    else:
+        return render(request, 'login.html')

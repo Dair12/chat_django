@@ -1,0 +1,28 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Create Group</title>
+  <link rel="stylesheet" href="{% static 'css/add_group.css' %}">
+</head>
+<body>
+  <div class="group-box">
+    <div class="button-container">
+      <button onclick="window.history.back()">cancel</button>
+      <button id="createGroupBtn">create</button>
+    </div>
+    <div class="group-name-container">
+      <img src="{% static 'image/camera.png' %}" alt="Group Icon" class="group-icon">
+      <input type="text" class="name-of-group" id="groupName" placeholder="Name of group">
+    </div>
+    <div class="group-name-container">
+      <input type="text" class="name-of-member" id="memberInput" placeholder="Name of member">
+    </div>
+    <div class="member-list" id="memberList">
+      <!-- Friends will be loaded here -->
+    </div>
+  </div>
+  <script type="module" src="{% static 'js/create_group.js' %}"></script>
+</body>
+</html>

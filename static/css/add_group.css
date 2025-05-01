@@ -1,0 +1,102 @@
+body {
+    background-color: black;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    font-family: Arial, sans-serif;
+  }
+  
+  .group-box {
+    background-color: black;
+    padding: 20px;
+    border-radius: 15px;
+    width: 350px;
+    box-sizing: border-box;
+  }
+  
+  .button-container {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    margin-bottom: 20px;
+  }
+  
+  .group-box button {
+    padding: 8px 20px;
+    font-size: 14px;
+    border: 1px solid #666;
+    border-radius: 10px;
+    background-color: #d3d3d3;
+    color: black;
+    cursor: pointer;
+    text-transform: lowercase;
+  }
+  
+  .group-name-container {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+  }
+  
+  .group-box input[type="text"] {
+    padding: 12px;
+    border: 1px solid #666;
+    border-radius: 12px;
+    background-color: #f4eded;
+    color: #666;
+    font-size: 14px;
+    box-sizing: border-box;
+  }
+  
+  .group-box input[type="text"]::placeholder {
+    color: #666;
+  }
+  
+  .group-box input.name-of-group {
+    width: 55%;
+    height: 33px;
+  }
+  
+  .group-box input.name-of-member {
+    width: 70%;
+    margin-left: 0;
+    margin-bottom: 15px;
+    height: 33px;
+  }
+  
+  .group-icon {
+    width: 37px;
+    height: 37px;
+    margin-right: 10px;
+    object-fit: cover;
+  }
+  
+  .member-list {
+    margin-top: 20px;
+  }
+  
+  .member-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+  }
+  
+  .member-item .avatar {
+    width: 30px;
+    height: 30px;
+    margin-right: 10px;
+    object-fit: cover;
+    border-radius: 50%;
+  }
+  
+  .member-item span.name {
+    flex: 1;
+    padding: 8px;
+    border: 1px solid #666;
+    border-radius: 10px;
+    background-color: #d3d3d3;
+    color: black;
+    font-size: 14px;
+  }  
