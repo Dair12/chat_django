@@ -11,7 +11,7 @@
     <!-- Верхняя панель -->
     <div class="chat-header">
       <img src="{% static 'image/back.png' %}" alt="Назад" class="back-icon" id="backIcon">
-      <img src="{% if chat_type == 'group' %}{% static 'image/default_group_avatar.png' %}{% else %}{% static 'image/default_user_avatar.webp' %}{% endif %}" alt="Аватар" class="avatar" id="chatAvatar">
+      <img src="{% if chat_type == 'group' %}{% static 'image/default_group_avatar.webp' %}{% else %}{% static 'image/default_user_avatar.webp' %}{% endif %}" alt="Аватар" class="avatar" id="chatAvatar">
       <span class="username" id="chatName">{{ chat_name }}</span>
     </div>
 
