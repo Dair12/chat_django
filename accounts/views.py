@@ -5,6 +5,8 @@ from .forms import CustomUserCreationForm
 from django.contrib.auth import authenticate, login
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render
+from friends.models import Friend
+from groups.models import Group
 
 def register_view(request):
     if request.method == 'POST':
@@ -44,6 +46,8 @@ def login_view(request):
 
 def home_view(request):
     if request.user.is_authenticated:
-        return render(request, 'home.html')
+        friends = Friend.objects.filter(owner=request.user).select_related('contact')
+        groups = Group.objects.filter(members__user=request.user).distinct()
+        return render(request, 'home.html', {'friends': friends, 'groups': groups})
     else:
         return render(request, 'login.html')

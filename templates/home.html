@@ -11,7 +11,6 @@
     <div class="header">
       <div class="header-left">
         <img id="add-chat-icon" src="{% static 'image/plus.png' %}" alt="Add Chat" data-add-button-url="{% url 'add_button' %}">
-        <!-- <img id="add-chat-icon" src="{% static 'image/plus.png' %}" alt="Add Chat"> -->
       </div>
       <h1>Chats</h1>
       <div class="header-right">
@@ -26,7 +25,29 @@
     </div>
 
     <div class="chat-list" id="chatList">
-      <!-- Chats will be inserted here -->
+      <!-- Контакты -->
+      {% for friend in friends %}
+        <div class="chat-item" data-name="{{ friend.contact.username|lower }}" data-created-at="{{ friend.created_at|date:'c' }}" data-type="friend">
+          <img class="avatar" src="{% static 'image/default_user_avatar.webp' %}" alt="friend">
+          <div class="chat-box">
+            <span data-id="{{ friend.contact.id }}">{{ friend.contact.username }}</span>
+          </div>
+        </div>
+      {% empty %}
+        <p>No contacts available.</p>
+      {% endfor %}
+      
+      <!-- Группы -->
+      {% for group in groups %}
+        <div class="chat-item" data-name="{{ group.name|lower }}" data-created-at="{{ group.created_at|date:'c' }}" data-type="group">
+          <img class="avatar" src="{% static 'image/default_group_avatar.webp' %}" alt="group">
+          <div class="chat-box">
+            <span data-id="{{ group.id }}">{{ group.name }}</span>
+          </div>
+        </div>
+      {% empty %}
+        <p>No groups available.</p>
+      {% endfor %}
     </div>
   </div>
 
