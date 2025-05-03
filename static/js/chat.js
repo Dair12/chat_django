@@ -16,7 +16,26 @@ document.addEventListener('DOMContentLoaded', () => {
     const socket = new WebSocket(
       'ws://' + window.location.host + '/ws/chat/' + (isGroup ? 'group' : 'user') + '/' + chatId + '/'
     );
-  
+    
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const messageDiv = entry.target;
+          const messageId = messageDiv.dataset.messageId;
+    
+          if (messageDiv.classList.contains('incoming') && !messageDiv.classList.contains('read')) {
+            socket.send(JSON.stringify({
+              action: 'read',
+              message_id: messageId
+            }));
+            messageDiv.classList.add('read'); // помечаем, что уже отправили
+          }
+        }
+      });
+    }, {
+      threshold: 1.0  // 100% должно быть видно
+    });    
+
     // Group name click handler
     chatName.addEventListener('click', (e) => {
       e.preventDefault();
@@ -55,6 +74,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         messagesContainer.appendChild(div);
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+        if (!isOwn) {
+          observer.observe(div);
+        }
       } else if (action === 'edit') {
         const message = data.message;
         const messageDiv = document.querySelector(`.message[data-message-id="${message.id}"]`);
@@ -211,4 +234,10 @@ document.addEventListener('DOMContentLoaded', () => {
   
     // Scroll to bottom
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+    document.querySelectorAll('.message.incoming').forEach(messageDiv => {
+      if (!messageDiv.classList.contains('read')) {
+        observer.observe(messageDiv);
+      }
+    });    
   });
