@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
       e.preventDefault();
       e.stopPropagation();
       if (isGroup) {
-        window.location.href = `group_info.html?group_id=${chatId}`;
+        window.location.href = `group_info?group_id=${chatId}`;
       } else {
         alert('Это не групповой чат.');
       }
@@ -35,7 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
   
     // Back button
     backIcon.addEventListener('click', () => {
-      window.location.href = '/chats.html';
+      window.location.href = '/home';
     });
   
     // WebSocket message handler
@@ -51,7 +51,7 @@ document.addEventListener('DOMContentLoaded', () => {
         div.dataset.messageId = message.id;
         div.textContent = message.content;
         if (isOwn && message.is_read) {
-          div.innerHTML += `<img src="/static/png/image 14.png" class="read-status" alt="✓">`;
+          div.innerHTML += `<img src="/static/image/check.png" class="read-status" alt="✓">`;
         }
         messagesContainer.appendChild(div);
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
@@ -61,7 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (messageDiv) {
           messageDiv.textContent = message.content;
           if (messageDiv.classList.contains('outgoing') && message.is_read) {
-            messageDiv.innerHTML += `<img src="/static/png/image 14.png" class="read-status" alt="✓">`;
+            messageDiv.innerHTML += `<img src="/static/image/check.png" class="read-status" alt="✓">`;
           }
         }
       } else if (action === 'delete') {
@@ -72,7 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
       } else if (action === 'read') {
         const messageDiv = document.querySelector(`.message[data-message-id="${data.message_id}"]`);
         if (messageDiv && messageDiv.classList.contains('outgoing')) {
-          messageDiv.innerHTML = messageDiv.textContent + `<img src="/static/png/image 14.png" class="read-status" alt="✓">`;
+          messageDiv.innerHTML = messageDiv.textContent + `<img src="/static/image/check.png" class="read-status" alt="✓">`;
         }
       }
     };

@@ -10,8 +10,8 @@
   <div class="chat-container">
     <!-- Верхняя панель -->
     <div class="chat-header">
-      <img src="{% static 'png/image 18.png' %}" alt="Назад" class="back-icon" id="backIcon">
-      <img src="{% if chat_type == 'group' %}{% static 'png/image 11.png' %}{% else %}{% static 'image/default_user_avatar.webp' %}{% endif %}" alt="Аватар" class="avatar" id="chatAvatar">
+      <img src="{% static 'image/back.png' %}" alt="Назад" class="back-icon" id="backIcon">
+      <img src="{% if chat_type == 'group' %}{% static 'image/default_group_avatar.png' %}{% else %}{% static 'image/default_user_avatar.webp' %}{% endif %}" alt="Аватар" class="avatar" id="chatAvatar">
       <span class="username" id="chatName">{{ chat_name }}</span>
     </div>
 
@@ -21,7 +21,7 @@
         <div class="message {% if message.sender == user %}outgoing{% else %}incoming{% endif %}" data-message-id="{{ message.id }}">
           {{ message.content }}
           {% if message.sender == user and message.is_read %}
-            <img src="{% static 'png/image 14.png' %}" class="read-status" alt="✓">
+            <img src="{% static 'image/check.png' %}" class="read-status" alt="✓">
           {% endif %}
         </div>
       {% endfor %}
@@ -43,9 +43,9 @@
     <div class="chat-footer">
       <div class="message-box">
         <input type="text" class="message-input" placeholder="Сообщение" id="messageInput">
-        <img src="{% static 'png/image 6.png' %}" alt="Смайл" class="smile-icon" id="emojiToggle">
+        <img src="{% static 'image/smiley.png' %}" alt="Смайл" class="smile-icon" id="emojiToggle">
       </div>
-      <img src="{% static 'png/image 17.png' %}" alt="Отправить" class="send-icon" id="sendButton">
+      <img src="{% static 'image/send.png' %}" alt="Отправить" class="send-icon" id="sendButton">
     </div>
   </div>
   <script>
