@@ -197,13 +197,17 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   
     // Mark messages as read
-    document.querySelectorAll('.message.incoming').forEach(messageDiv => {
-      const messageId = messageDiv.dataset.messageId;
-      socket.send(JSON.stringify({
-        'action': 'read',
-        'message_id': messageId
-      }));
-    });
+    socket.onopen = function(e) {
+    
+      // Отправка "прочитано" только после установления соединения
+      document.querySelectorAll('.message.incoming').forEach(messageDiv => {
+        const messageId = messageDiv.dataset.messageId;
+        socket.send(JSON.stringify({
+          'action': 'read',
+          'message_id': messageId
+        }));
+      });
+    };    
   
     // Scroll to bottom
     messagesContainer.scrollTop = messagesContainer.scrollHeight;

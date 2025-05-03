@@ -11,7 +11,12 @@ class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         self.chat_type = self.scope['url_route']['kwargs']['chat_type']
         self.chat_id = self.scope['url_route']['kwargs']['chat_id']
-        self.room_group_name = f"chat_{self.chat_type}_{self.chat_id}"
+        if self.chat_type == 'user':
+            user = self.scope['user']
+            ids = sorted([user.id, int(self.chat_id)])  # сортировка для одинакового room name
+            self.room_group_name = f"chat_user_{ids[0]}_{ids[1]}"
+        else:
+            self.room_group_name = f"chat_group_{self.chat_id}"
 
         if not await self.is_authorized():
             await self.close()
