@@ -6,6 +6,7 @@ from .models import Message
 from groups.models import Group, GroupMember
 from friends.models import Friend
 from django.utils import timezone
+from .utils.translate import translate_message
 
 class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
@@ -133,15 +134,21 @@ class ChatConsumer(AsyncWebsocketConsumer):
         elif self.chat_type == 'user':
             return user.id == int(self.chat_id) or Friend.objects.filter(owner=user, contact_id=self.chat_id).exists()
         return False
-
+    
     @database_sync_to_async
     def create_message(self, content):
         user = self.scope['user']
         message = Message(sender=user, content=content)
+
+        recipient_lang = 'en'
+        translated = translate_message(content, recipient_lang)
+        message.translated_content = translated
+
         if self.chat_type == 'group':
             message.group_id = self.chat_id
         elif self.chat_type == 'user':
             message.recipient_id = self.chat_id
+
         message.save()
         return message
 

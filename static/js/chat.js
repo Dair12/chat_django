@@ -240,4 +240,19 @@ document.addEventListener('DOMContentLoaded', () => {
         observer.observe(messageDiv);
       }
     });    
+    
+    document.addEventListener('click', (event) => {
+      if (event.target.classList.contains('toggle-original-btn')) {
+        const button = event.target;
+        const originalSpan = button.nextElementSibling;
+    
+        if (originalSpan.style.display === 'none') {
+          originalSpan.style.display = 'inline';
+          button.innerText = 'Скрыть оригинал';
+        } else {
+          originalSpan.style.display = 'none';
+          button.innerText = 'Показать оригинал';
+        }
+      }
+    });    
   });
