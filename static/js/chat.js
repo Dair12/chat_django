@@ -240,19 +240,20 @@ document.addEventListener('DOMContentLoaded', () => {
         observer.observe(messageDiv);
       }
     });    
-    
+
     document.addEventListener('click', (event) => {
       if (event.target.classList.contains('toggle-original-btn')) {
-        const button = event.target;
-        const originalSpan = button.nextElementSibling;
+        const messageDiv = event.target.closest('.message');
+        const original = messageDiv.querySelector('.original');
+        const translated = messageDiv.querySelector('.translated');
     
-        if (originalSpan.style.display === 'none') {
-          originalSpan.style.display = 'inline';
-          button.innerText = 'Скрыть оригинал';
-        } else {
-          originalSpan.style.display = 'none';
-          button.innerText = 'Показать оригинал';
+        if (original && translated) {
+          const isOriginalVisible = original.style.display === 'block';
+    
+          original.style.display = isOriginalVisible ? 'none' : 'block';
+          translated.style.display = isOriginalVisible ? 'block' : 'none';
+          event.target.textContent = isOriginalVisible ? 'Показать оригинал' : 'Скрыть оригинал';
         }
       }
-    });    
+    });      
   });

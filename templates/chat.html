@@ -19,13 +19,12 @@
     <div class="messages" id="messages">
       {% for message in messages %}
         <div class="message {% if message.sender == user %}outgoing{% else %}incoming{% endif %}" data-message-id="{{ message.id }}">
-          <span class="translated">{{ message.translated_content|default:message.content }}</span>
           {% if message.translated_content %}
             <button class="toggle-original-btn">Показать оригинал</button>
-            <span class="original" style="display: none;">{{ message.content }}</span>          
           {% endif %}
-          {% if message.sender == user and message.is_read %}
-            <img src="{% static 'image/check.png' %}" class="read-status" alt="✓">
+          <span class="translated">{{ message.translated_content|default:message.content }}</span>
+          {% if message.translated_content %}
+            <span class="original" style="display: none;">{{ message.content }}</span>          
           {% endif %}
         </div>
       {% endfor %}
