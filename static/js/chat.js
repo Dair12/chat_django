@@ -68,13 +68,29 @@ document.addEventListener('DOMContentLoaded', () => {
         const div = document.createElement('div');
         div.className = `message ${isOwn ? 'outgoing' : 'incoming'}`;
         div.dataset.messageId = message.id;
-        div.textContent = message.content;
-        if (isOwn && message.is_read) {
-          div.innerHTML += `<img src="/static/image/check.png" class="read-status" alt="✓">`;
+      
+        if (message.translated_content && message.translated_content !== message.content) {
+          div.innerHTML = `
+            <button class="toggle-original-btn">Translation</button>
+            <span class="translated">${message.translated_content}</span>
+            <span class="original" style="display: none;">${message.content}</span>
+          `;
+        } else {
+          div.textContent = message.content;
         }
+      
+        // Добавляем статус прочитано, если это исходящее и прочитано
+        if (isOwn && message.is_read) {
+          const checkImg = document.createElement('img');
+          checkImg.src = "/static/image/check.png";
+          checkImg.className = "read-status";
+          checkImg.alt = "✓";
+          div.appendChild(checkImg);
+        }
+      
         messagesContainer.appendChild(div);
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
-
+      
         if (!isOwn) {
           observer.observe(div);
         }
@@ -252,7 +268,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
           original.style.display = isOriginalVisible ? 'none' : 'block';
           translated.style.display = isOriginalVisible ? 'block' : 'none';
-          event.target.textContent = isOriginalVisible ? 'Показать оригинал' : 'Скрыть оригинал';
+          event.target.textContent = isOriginalVisible ? 'Translation' : 'Original';
         }
       }
     });      

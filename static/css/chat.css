@@ -93,9 +93,17 @@
     border-radius: 10px;
     font-size: 14px;
     display: flex;
-    align-items: center;
+    flex-direction: column;
+    position: relative;
+    padding: 24px 40px 8px 40px;
+    align-items: stretch;
+    /* align-items: center; */
     position: relative;
     word-break: break-word;
+  }
+  
+  .message span {
+    width: 100%;
   }
   
   .incoming {
@@ -229,25 +237,29 @@
   }
 
   .toggle-original-btn {
-    display: block;
-    width: fit-content;
-    max-width: 100%;
-    margin-bottom: 4px;
-    background-color: #e0e0e0;
-    border: none;
-    border-radius: 12px;
-    color: rgba(0, 0, 0, 0.5);
+    position: absolute;
+    top: 6px;
     font-size: 12px;
     font-weight: 500;
-    padding: 4px 10px;
+    background: transparent;
+    border: none;
+    color: rgba(0, 0, 0, 0.4);
     cursor: pointer;
-    transition: background-color 0.2s ease;
+    padding: 0;
   }
   
+  .outgoing .toggle-original-btn {
+    right: 12px;
+  }
+  
+  .incoming .toggle-original-btn {
+    left: 12px;
+  }  
+  
   .toggle-original-btn:hover {
-    background-color: #d6d6d6;
+    background-color: #c0c0c0;
   }
   
   .toggle-original-btn:active {
     transform: scale(0.98);
-  }  
+  }

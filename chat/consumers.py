@@ -63,6 +63,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                     'id': message.id,
                     'sender': message.sender.username,
                     'content': message.content,
+                    'translated_content': message.translated_content,
                     'created_at': message.created_at.isoformat(),
                     'is_read': message.is_read,
                 }
