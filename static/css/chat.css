@@ -100,7 +100,13 @@
   }
 
   .message-content {
-    position: relative; /* Для абсолютного позиционирования кнопки внутри */
+    display: flex;
+    flex-direction: column;
+    position: relative;
+  }
+
+  .text-content {
+    margin-top: 5px;
   }
 
   .read-status {
@@ -246,27 +252,27 @@
   }
 
   .toggle-original-btn {
-    position: absolute;
-    top: 6px;
+    align-self: flex-start;
+    background-color: #c0c0c0;
+    border-radius: 5px;
+    padding: 2px 6px;
     font-size: 12px;
     font-weight: 500;
-    background: transparent;
+    color: black;
     border: none;
-    color: rgba(0, 0, 0, 0.4);
     cursor: pointer;
-    padding: 0;
-  }
-  
-  .outgoing .toggle-original-btn {
-    right: 12px;
   }
   
   .incoming .toggle-original-btn {
-    left: 12px;
+    align-self: flex-start;
+  }
+  
+  .outgoing .toggle-original-btn {
+    align-self: flex-end;
   }  
   
   .toggle-original-btn:hover {
-    background-color: #c0c0c0;
+    background-color: #a0a0a0;
   }
   
   .toggle-original-btn:active {
