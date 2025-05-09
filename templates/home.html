@@ -1,0 +1,56 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Chats</title>
+  <link rel="stylesheet" href="{% static 'css/home.css' %}">
+</head>
+<body>
+  <div class="chat-container">
+    <div class="header">
+      <div class="header-left">
+        <img id="add-chat-icon" src="{% static 'image/plus.png' %}" alt="Add Chat" data-add-button-url="{% url 'add_button' %}">
+      </div>
+      <h1>Chats</h1>
+      <div class="header-right">
+        <img src="{% static 'image/filter.png' %}" alt="Filter" id="filterIcon">
+        <div id="filterOptions" class="filter-options">
+          <button id="sortAZ">A-Z</button>
+          <button id="sortTime">Time</button>
+        </div>
+        <img src="{% static 'image/search.png' %}" alt="Search" id="searchIcon">
+        <input type="text" id="searchInput" placeholder="Search" class="search-input">
+      </div>
+    </div>
+
+    <div class="chat-list" id="chatList">
+      <!-- Контакты -->
+      {% for friend in friends %}
+        <div class="chat-item" data-name="{{ friend.contact.username|lower }}" data-created-at="{{ friend.created_at|date:'c' }}" data-type="friend">
+          <img class="avatar" src="{% static 'image/default_user_avatar.webp' %}" alt="friend">
+          <div class="chat-box">
+            <span data-id="{{ friend.contact.id }}">{{ friend.contact.username }}</span>
+          </div>
+        </div>
+      {% empty %}
+        <p>No contacts available.</p>
+      {% endfor %}
+      
+      <!-- Группы -->
+      {% for group in groups %}
+        <div class="chat-item" data-name="{{ group.name|lower }}" data-created-at="{{ group.created_at|date:'c' }}" data-type="group">
+          <img class="avatar" src="{% static 'image/default_group_avatar.webp' %}" alt="group">
+          <div class="chat-box">
+            <span data-id="{{ group.id }}">{{ group.name }}</span>
+          </div>
+        </div>
+      {% empty %}
+        <p>No groups available.</p>
+      {% endfor %}
+    </div>
+  </div>
+
+  <script type="module" src="{% static 'js/home.js' %}"></script>
+</body>
+</html>

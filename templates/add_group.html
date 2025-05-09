@@ -1,0 +1,38 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Create Group</title>
+  <link rel="stylesheet" href="{% static 'css/add_group.css' %}">
+</head>
+<body>
+  <div class="group-box">
+    <div class="button-container">
+      <button onclick="window.history.back()">cancel</button>
+      <button id="createGroupBtn">create</button>
+    </div>
+    <div class="group-name-container">
+      <img src="{% static 'image/camera.png' %}" alt="Group Icon" class="group-icon">
+      <input type="text" class="name-of-group" id="groupName" placeholder="Name of group">
+    </div>
+    <div class="group-name-container">
+      <input type="text" class="name-of-member" id="memberInput" placeholder="Search members">
+    </div>
+    <div class="member-list" id="memberList">
+        {% for friend in friends %}
+          <div class="member-item" data-username="{{ friend.contact.username }}">
+            <img src="{% static 'image/default_user_avatar.webp' %}" class="avatar" alt="User Avatar">
+            <label style="display:flex;align-items:center;gap:8px;">
+              <input type="checkbox" class="friend-checkbox" value="{{ friend.contact.username }}">
+              <span class="name">{{ friend.contact.username }}</span>
+            </label>
+          </div>
+        {% empty %}
+          <p>No friends found.</p>
+        {% endfor %}
+      </div>      
+  </div>
+  <script type="module" src="{% static 'js/add_group.js' %}"></script>
+</body>
+</html>

@@ -1,0 +1,265 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+  
+  body {
+    background-color: black;
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+  }
+  
+  .chat-container {
+    width: 400px;
+    height: 70vh;
+    background-color: black;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .chat-header {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    color: white;
+  }
+  
+  .back-icon {
+    width: 30px;
+    height: 30px;
+    margin-right: 10px;
+    cursor: pointer;
+  }
+  
+  .avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 10px;
+  }
+  
+  .username {
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -webkit-touch-callout: none;
+    touch-action: manipulation;
+    cursor: pointer;
+    position: relative;
+    z-index: 10;
+  }
+  
+  #chatName {
+    cursor: pointer;
+    transition: color 0.2s ease;
+  }
+  
+  #chatName:hover {
+    color: #4a8cff;
+    text-decoration: underline;
+  }
+  
+  .messages {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+    gap: 10px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #555 transparent;
+  }
+  
+  .messages::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  .messages::-webkit-scrollbar-thumb {
+    background-color: #555;
+    border-radius: 4px;
+  }
+  
+  .message {
+    max-width: 70%;
+    padding: 8px 12px;
+    border-radius: 10px;
+    font-size: 14px;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    padding: 24px 40px 8px 40px;
+    align-items: stretch;
+    /* align-items: center; */
+    position: relative;
+    word-break: break-word;
+  }
+  
+  .message span {
+    width: 100%;
+  }
+  
+  .incoming {
+    align-self: flex-start;
+    background-color: #e0e0e0;
+    color: black;
+  }
+  
+  .outgoing {
+    align-self: flex-end;
+    background-color: #d3d3d3;
+    color: black;
+  }
+  
+  .read-status {
+    width: 12px;
+    height: 12px;
+    margin-left: 5px;
+  }
+  
+  .chat-footer {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    gap: 10px;
+    position: relative;
+  }
+  
+  .message-box {
+    flex-grow: 1;
+    position: relative;
+  }
+  
+  .message-input {
+    width: 100%;
+    padding: 8px 35px 8px 10px;
+    border-radius: 20px;
+    border: none;
+    font-size: 14px;
+    background-color: #d3d3d3;
+  }
+  
+  .smile-icon {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+  }
+  
+  .emoji-picker {
+    position: absolute;
+    bottom: 50px;
+    left: 10px;
+    background-color: rgba(255, 255, 255, 0.821);
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    padding: 5px;
+    display: none;
+    flex-wrap: wrap;
+    gap: 5px;
+    max-width: 200px;
+    max-height: 150px;
+    overflow-y: auto;
+    z-index: 10;
+  }
+  
+  .emoji-picker span {
+    font-size: 20px;
+    cursor: pointer;
+  }
+  
+  .send-icon {
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+  }
+  
+  .context-menu {
+    position: fixed;
+    background-color: #d3d3d3;
+    border-radius: 6px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    z-index: 100;
+    display: none;
+    flex-direction: column;
+    width: 80px;
+    overflow: hidden;
+    opacity: 0;
+    transform: translateY(-5px);
+    visibility: hidden;
+    transition: 
+      opacity 0.2s ease,
+      transform 0.2s ease,
+      visibility 0.2s;
+  }
+  
+  .context-menu button {
+    border: none;
+    background: none;
+    padding: 6px 8px;
+    text-align: left;
+    cursor: pointer;
+    font-size: 13px;
+    transition: all 0.1s ease;
+  }
+  
+  .context-menu .edit-btn {
+    color: #4a8cff;
+  }
+  
+  .context-menu .delete-btn {
+    color: #ff4a4a;
+  }
+  
+  .context-menu button:hover {
+    background-color: gainsboro;
+  }
+  
+  .message.active {
+    z-index: 101;
+    position: relative;
+  }
+  
+  .message.active .context-menu {
+    opacity: 1;
+    transform: translateY(0);
+    visibility: visible;
+  }
+
+  .toggle-original-btn {
+    position: absolute;
+    top: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    background: transparent;
+    border: none;
+    color: rgba(0, 0, 0, 0.4);
+    cursor: pointer;
+    padding: 0;
+  }
+  
+  .outgoing .toggle-original-btn {
+    right: 12px;
+  }
+  
+  .incoming .toggle-original-btn {
+    left: 12px;
+  }  
+  
+  .toggle-original-btn:hover {
+    background-color: #c0c0c0;
+  }
+  
+  .toggle-original-btn:active {
+    transform: scale(0.98);
+  }
