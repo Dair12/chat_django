@@ -1,17 +1,20 @@
 import os
-from google.cloud import translate_v2 as translate
 from dotenv import load_dotenv
+from google.cloud import translate_v2 as translate
 
-# Загружаем переменные из .env
+# Загружаем .env
 load_dotenv()
 
-# Получаем путь из переменной окружения
-credential_path = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
+# Получаем путь из переменной
+credential_path = os.getenv("GOOGLE_KEY_PATH")
 
-# Устанавливаем путь в системную переменную
-os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = os.path.abspath(credential_path)
+if not credential_path:
+    raise RuntimeError("GOOGLE_KEY_PATH не установлен в .env!")
 
-# Создаем клиента
+# Устанавливаем системную переменную (обязательно для клиента Google)
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = credential_path
+
+# Инициализация клиента
 translate_client = translate.Client()
 
 def translate_message(text, target_language='en'):
