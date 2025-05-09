@@ -86,6 +86,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                     'message': {
                         'id': message.id,
                         'content': message.content,
+                        'translated_content': message.translated_content,
                         'updated_at': message.updated_at.isoformat(),
                     }
                 }
@@ -141,7 +142,13 @@ class ChatConsumer(AsyncWebsocketConsumer):
         user = self.scope['user']
         message = Message(sender=user, content=content)
 
-        recipient_lang = 'en'
+        recipient_lang = 'en'  # Предполагается язык получателя
+        if self.chat_type == 'user':
+            try:
+                recipient = User.objects.get(id=self.chat_id)
+                recipient_lang = 'en'#getattr(recipient.profile, 'language', 'en')  # Предполагается, что у User есть профиль с языком
+            except User.DoesNotExist:
+                recipient_lang = 'en'
         translated = translate_message(content, recipient_lang)
         message.translated_content = translated
 
@@ -159,6 +166,17 @@ class ChatConsumer(AsyncWebsocketConsumer):
         try:
             message = Message.objects.get(id=message_id, sender=user)
             message.content = content
+            recipient_lang = 'en'
+            if self.chat_type == 'user':
+                try:
+                    recipient = User.objects.get(id=self.chat_id)
+                    recipient_lang = 'en'#getattr(recipient.profile, 'language', 'en')
+                except User.DoesNotExist:
+                    recipient_lang = 'en'
+                translated = translate_message(content, recipient_lang)
+                message.translated_content = translated
+            else:
+                message.translated_content = content  # Для групп перевод не нужен
             message.updated_at = timezone.now()
             message.save()
             return message

@@ -8,41 +8,41 @@
 </head>
 <body data-chat-id="{{ chat_id }}" data-is-group="{% if chat_type == 'group' %}1{% else %}0{% endif %}">
   <div class="chat-container">
-    <!-- Верхняя панель -->
     <div class="chat-header">
       <img src="{% static 'image/back.png' %}" alt="Назад" class="back-icon" id="backIcon">
       <img src="{% if chat_type == 'group' %}{% static 'image/default_group_avatar.webp' %}{% else %}{% static 'image/default_user_avatar.webp' %}{% endif %}" alt="Аватар" class="avatar" id="chatAvatar">
       <span class="username" id="chatName">{{ chat_name }}</span>
     </div>
 
-    <!-- Сообщения -->
     <div class="messages" id="messages">
       {% for message in messages %}
         <div class="message {% if message.sender == user %}outgoing{% else %}incoming{% endif %}" data-message-id="{{ message.id }}">
-          {% if message.translated_content %}
-            <button class="toggle-original-btn">Translation</button>
-          {% endif %}
-          <span class="translated">{{ message.translated_content|default:message.content }}</span>
-          {% if message.translated_content %}
-            <span class="original" style="display: none;">{{ message.content }}</span>          
+          <div class="message-content">
+            {% if message.translated_content and message.translated_content != message.content %}
+              <button class="toggle-original-btn">Translation</button>
+              <span class="translated">{{ message.translated_content }}</span>
+              <span class="original" style="display: none;">{{ message.content }}</span>
+            {% else %}
+              <span>{{ message.content }}</span>
+            {% endif %}
+          </div>
+          {% if message.sender == user and message.is_read %}
+            <img src="{% static 'image/check.png' %}" class="read-status" alt="✓">
           {% endif %}
         </div>
       {% endfor %}
     </div>
 
-    <!-- Контекстное меню -->
     <div class="context-menu" id="contextMenu">
       <button class="edit-btn" id="editMessage">edit</button>
       <button class="delete-btn" id="deleteMessage">delete</button>
     </div>
 
-    <!-- Эмодзи-панель -->
     <div class="emoji-picker" id="emojiPicker">
       <span>😀</span><span>😎</span><span>😂</span><span>😅</span><span>😍</span>
       <span>👍</span><span>🔥</span><span>💯</span><span>😭</span><span>😡</span>
     </div>
 
-    <!-- Нижняя панель -->
     <div class="chat-footer">
       <div class="message-box">
         <input type="text" class="message-input" placeholder="Сообщение" id="messageInput">
