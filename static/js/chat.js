@@ -71,7 +71,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let contentHtml = '';
         if (message.translated_content && message.translated_content !== message.content) {
           contentHtml = `
-            <button class="toggle-original-btn">Translation</button>
+            <button class="toggle-original-btn">Show original</button>
             <span class="translated">${message.translated_content}</span>
             <span class="original" style="display: none;">${message.content}</span>
           `;
@@ -103,7 +103,7 @@ document.addEventListener('DOMContentLoaded', () => {
             let contentHtml = '';
             if (message.translated_content && message.translated_content !== message.content) {
               contentHtml = `
-                <button class="toggle-original-btn">Translation</button>
+                <button class="toggle-original-btn">Show original</button>
                 <span class="translated">${message.translated_content}</span>
                 <span class="original" style="display: none;">${message.content}</span>
               `;
@@ -293,7 +293,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
           original.style.display = isOriginalVisible ? 'none' : 'block';
           translated.style.display = isOriginalVisible ? 'block' : 'none';
-          event.target.textContent = isOriginalVisible ? 'Translation' : 'Original';
+          event.target.textContent = isOriginalVisible ? 'Show original' : 'Show translation';
         }
       }
     });

@@ -19,7 +19,7 @@
         <div class="message {% if message.sender == user %}outgoing{% else %}incoming{% endif %}" data-message-id="{{ message.id }}">
           <div class="message-content">
             {% if message.translated_content and message.translated_content != message.content %}
-              <button class="toggle-original-btn">Translation</button>
+              <button class="toggle-original-btn">Show original</button>
               <div class="text-content">
                 <span class="translated">{{ message.translated_content }}</span>
                 <span class="original" style="display: none;">{{ message.content }}</span>
