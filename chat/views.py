@@ -1,11 +1,17 @@
-from django.http import HttpResponseBadRequest, JsonResponse
+import json
+from django.http import HttpResponseBadRequest
 from django.shortcuts import render
 from groups.models import Group, GroupActivity
 from friends.models import Friend
 from .models import Message
 from django.db import models
 from datetime import datetime
+from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 
+@csrf_exempt
+@login_required
 def chat_view(request, chat_type, chat_id):
     if not request.user.is_authenticated:
         return render(request, 'login.html')
@@ -15,19 +21,32 @@ def chat_view(request, chat_type, chat_id):
             group = Group.objects.get(id=chat_id, members__user=request.user)
             messages = Message.objects.filter(group_id=chat_id).order_by('created_at')
 
-            # Записываем начало сессии
             if request.method == 'GET':
-                GroupActivity.objects.create(group=group, user=request.user)
+                # Создаем запись о начале сессии
+                activity = GroupActivity.objects.create(group=group, user=request.user)
+                print(f"Activity created: {activity}")  # Отладка
 
-            # Если пользователь покидает чат (например, через AJAX или закрытие страницы)
-            if request.method == 'POST':
+            elif request.method == 'POST':
+                try:
+                    data = json.loads(request.body)
+                    action = data.get('action', '')
+                except json.JSONDecodeError:
+                    action = ''
+
+                # Находим последнюю незакрытую сессию
                 activity = GroupActivity.objects.filter(
                     group=group, user=request.user, end_time__isnull=True
                 ).order_by('-start_time').first()
-                if activity:
-                    activity.end_time = datetime.now()
-                    activity.save()
-                return JsonResponse({'success': True})
+
+                if action in ['heartbeat', 'end_session'] or not action:
+                    if activity:
+                        activity.end_time = datetime.now()
+                        activity.save()
+                        print(f"Activity updated: {activity}, Duration: {activity.duration}")  # Отладка
+                        return JsonResponse({'success': True})
+                    else:
+                        print("No open activity found")  # Отладка
+                        return JsonResponse({'success': False, 'error': 'No open session'})
 
             return render(request, 'chat.html', {
                 'chat_type': chat_type,

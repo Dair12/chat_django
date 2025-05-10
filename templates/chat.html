@@ -53,10 +53,12 @@
       <img src="{% static 'image/send.png' %}" alt="Отправить" class="send-icon" id="sendButton">
     </div>
   </div>
+  <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
   <script>
     const userID = "{{ user.id }}";
     const userName = "{{ user.username }}";
   </script>
   <script src="{% static 'js/chat.js' %}"></script>
+  <script src="{% static 'js/session.js' %}"></script>
 </body>
 </html>
