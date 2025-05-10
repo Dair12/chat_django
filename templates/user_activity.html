@@ -1,0 +1,22 @@
+<!-- user_activity.html -->
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>User Activity</title>
+  <link rel="stylesheet" href="{% static 'css/user_activity.css' %}">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <div class="activity-container">
+    <h3 id="activityUsername">{{ username }}'s Activity</h3>
+    <p id="totalMessages">Total Messages: {{ total_messages }}</p>
+    <canvas id="messageChart" width="400" height="200"></canvas>
+  </div>
+    <script>
+    const graphData = '{{ graph_data|safe }}';
+    </script>
+    <script src="{% static 'js/user_activity.js' %}"></script>
+</body>
+</html>

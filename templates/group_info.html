@@ -5,7 +5,6 @@
   <meta charset="UTF-8">
   <title>Group Info</title>
   <link rel="stylesheet" href="{% static 'css/group_info.css' %}">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
   <div class="group-info-container">
@@ -25,27 +24,21 @@
       <h3 id="memberCount">{{ members.count }} members</h3>
       <div id="memberList" class="member-list">
         {% for member in members %}
-          <div class="member-item" data-user-id="{{ member.user.id }}">
-            <img src="{% static 'image/default_user_avatar.webp' %}" alt="Avatar" class="avatar">
-            <span>{{ member.user.username }}</span>
-          </div>
+          <a href="{% url 'user_activity' group.id member.user.id %}" class="member-item-link">
+            <div class="member-item">
+              <img src="{% static 'image/default_user_avatar.webp' %}" alt="Avatar" class="avatar">
+              <span class="username">{{ member.user.username }}</span>
+            </div>
+          </a>
         {% endfor %}
       </div>
     </div>
     <button id="exitBtn">exit from group</button>
-    {% if group.owner == user %}
-      <div id="activityPanel" class="activity-panel">
-        <h3 id="activityUsername">User Activity</h3>
-        <p id="totalMessages">Total Messages: 0</p>
-        <canvas id="messageChart" width="400" height="200"></canvas>
-        <button id="closeActivityBtn">Close</button>
-      </div>
-    {% endif %}
   </div>
   <script>
     const csrfToken = "{{ csrf_token }}";
     const groupId = "{{ group.id }}";
-    const isOwner = "{% if group.owner == user %}true{% else %}false{% endif %}" === "true";
+    const isOwner = '{% if group.owner == user %}true{% else %}false{% endif %}';
   </script>
   <script src="{% static 'js/group_info.js' %}"></script>
 </body>

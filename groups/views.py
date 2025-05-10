@@ -97,47 +97,43 @@ def group_info(request, group_id):
 @login_required
 def user_activity(request, group_id, user_id):
     group = get_object_or_404(Group, id=group_id)
-    # Only group owner can access activity
+
     if group.owner != request.user:
-        return JsonResponse({'success': False, 'error': 'Permission denied'})
+        return redirect('group_info', group_id=group_id)
 
-    try:
-        user = User.objects.get(id=user_id)
-        # Check if user is a member of the group
-        if not GroupMember.objects.filter(group=group, user=user).exists():
-            return JsonResponse({'success': False, 'error': 'User is not a group member'})
+    user = get_object_or_404(User, id=user_id)
 
-        # Total message count
-        total_messages = Message.objects.filter(group=group, sender=user).count()
+    if not GroupMember.objects.filter(group=group, user=user).exists():
+        return redirect('group_info', group_id=group_id)
 
-        # Daily message distribution (last 7 days for simplicity)
-        end_date = datetime.now().date()
-        start_date = end_date - timedelta(days=6)  # 7 days including today
-        daily_messages = (
-            Message.objects.filter(
-                group=group,
-                sender=user,
-                created_at__date__gte=start_date,
-                created_at__date__lte=end_date
-            )
-            .annotate(date=TruncDate('created_at'))
-            .values('date')
-            .annotate(count=Count('id'))
-            .order_by('date')
+    total_messages = Message.objects.filter(group=group, sender=user).count()
+
+    end_date = datetime.now().date()
+    start_date = end_date - timedelta(days=6)
+
+    daily_messages = (
+        Message.objects.filter(
+            group=group,
+            sender=user,
+            created_at__date__gte=start_date,
+            created_at__date__lte=end_date
         )
+        .annotate(date=TruncDate('created_at'))
+        .values('date')
+        .annotate(count=Count('id'))
+        .order_by('date')
+    )
 
-        # Prepare data for the graph
-        date_counts = {str(item['date']): item['count'] for item in daily_messages}
-        labels = [(start_date + timedelta(days=i)).strftime('%Y-%m-%d') for i in range(7)]
-        data = [date_counts.get(label, 0) for label in labels]
+    date_counts = {str(item['date']): item['count'] for item in daily_messages}
+    labels = [(start_date + timedelta(days=i)).strftime('%Y-%m-%d') for i in range(7)]
+    data = [date_counts.get(label, 0) for label in labels]
 
-        return JsonResponse({
-            'success': True,
-            'total_messages': total_messages,
-            'graph_data': {
-                'labels': labels,
-                'data': data
-            }
-        })
-    except User.DoesNotExist:
-        return JsonResponse({'success': False, 'error': 'User not found'})
+    context = {
+        'username': user.username,
+        'total_messages': total_messages,
+        'graph_data': {
+            'labels': labels,
+            'data': data
+        }
+    }
+    return render(request, 'user_activity.html', context)
