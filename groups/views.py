@@ -5,7 +5,11 @@ from django.views.decorators.csrf import csrf_exempt
 from .models import Group, GroupMember
 from django.contrib.auth.models import User
 from friends.models import Friend
+from chat.models import Message
+from django.db.models import Count
+from django.db.models.functions import TruncDate
 import json
+from datetime import datetime, timedelta
 
 @csrf_exempt
 @login_required
@@ -88,3 +92,52 @@ def group_info(request, group_id):
                 return JsonResponse({'success': False, 'error': 'Invalid action or permission denied'})
         except json.JSONDecodeError:
             return JsonResponse({'success': False, 'error': 'Invalid JSON'})
+
+@csrf_exempt
+@login_required
+def user_activity(request, group_id, user_id):
+    group = get_object_or_404(Group, id=group_id)
+    # Only group owner can access activity
+    if group.owner != request.user:
+        return JsonResponse({'success': False, 'error': 'Permission denied'})
+
+    try:
+        user = User.objects.get(id=user_id)
+        # Check if user is a member of the group
+        if not GroupMember.objects.filter(group=group, user=user).exists():
+            return JsonResponse({'success': False, 'error': 'User is not a group member'})
+
+        # Total message count
+        total_messages = Message.objects.filter(group=group, sender=user).count()
+
+        # Daily message distribution (last 7 days for simplicity)
+        end_date = datetime.now().date()
+        start_date = end_date - timedelta(days=6)  # 7 days including today
+        daily_messages = (
+            Message.objects.filter(
+                group=group,
+                sender=user,
+                created_at__date__gte=start_date,
+                created_at__date__lte=end_date
+            )
+            .annotate(date=TruncDate('created_at'))
+            .values('date')
+            .annotate(count=Count('id'))
+            .order_by('date')
+        )
+
+        # Prepare data for the graph
+        date_counts = {str(item['date']): item['count'] for item in daily_messages}
+        labels = [(start_date + timedelta(days=i)).strftime('%Y-%m-%d') for i in range(7)]
+        data = [date_counts.get(label, 0) for label in labels]
+
+        return JsonResponse({
+            'success': True,
+            'total_messages': total_messages,
+            'graph_data': {
+                'labels': labels,
+                'data': data
+            }
+        })
+    except User.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'User not found'})
