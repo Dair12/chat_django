@@ -15,7 +15,7 @@ body {
   border-radius: 12px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
   text-align: center;
-  width: 400px;
+  width: 500px;
 }
 
 .activity-container h3 {
@@ -25,10 +25,41 @@ body {
 
 .activity-container p {
   font-size: 16px;
+  margin-bottom: 10px;
+}
+
+.chart-controls {
   margin-bottom: 20px;
+}
+
+.chart-controls button {
+  background-color: #333;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  margin: 0 5px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.chart-controls button.active,
+.chart-controls button:hover {
+  background-color: #4bc0c0;
 }
 
 canvas {
   max-width: 100%;
   height: 200px;
+}
+
+a {
+  display: inline-block;
+  margin-top: 20px;
+  color: #4bc0c0;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
 }

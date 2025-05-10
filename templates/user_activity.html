@@ -9,9 +9,15 @@
 </head>
 <body>
   <div class="activity-container">
-    <h3>{{ username }}'s Activity</h3>
+    <h3>{{ username }}'s Activity in {{ group.name }}</h3>
     <p>Total Messages: {{ total_messages }}</p>
-    <canvas id="messageChart" width="400" height="200"></canvas>
+    <p>Total Time Spent: {{ total_duration|floatformat:2 }} minutes</p>
+    <div class="chart-controls">
+      <button id="showMessages" class="active">Messages per Day</button>
+      <button id="showMinutes">Minutes per Day</button>
+    </div>
+    <canvas id="activityChart" width="400" height="200"></canvas>
+    <a href="{% url 'group_info' group.id %}">Back to Group</a>
   </div>
   <script>
     const graphData = JSON.parse('{{ graph_data|escapejs }}');

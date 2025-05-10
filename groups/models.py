@@ -19,3 +19,18 @@ class GroupMember(models.Model):
 
     def __str__(self):
         return f"{self.user.username} in {self.group.name}"
+
+class GroupActivity(models.Model):
+    group = models.ForeignKey(Group, on_delete=models.CASCADE, related_name='activities')
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    start_time = models.DateTimeField(auto_now_add=True)
+    end_time = models.DateTimeField(null=True, blank=True)
+    duration = models.DurationField(null=True, blank=True)  # Хранит длительность сессии
+
+    def save(self, *args, **kwargs):
+        if self.end_time and self.start_time:
+            self.duration = self.end_time - self.start_time
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.user.username} in {self.group.name} from {self.start_time}"

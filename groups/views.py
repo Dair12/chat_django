@@ -2,11 +2,11 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
-from .models import Group, GroupMember
+from .models import Group, GroupMember, GroupActivity
 from django.contrib.auth.models import User
 from friends.models import Friend
 from chat.models import Message
-from django.db.models import Count
+from django.db.models import Count, Sum
 from django.db.models.functions import TruncDate
 import json
 from datetime import datetime, timedelta
@@ -106,11 +106,10 @@ def user_activity(request, group_id, user_id):
     if not GroupMember.objects.filter(group=group, user=user).exists():
         return redirect('group_info', group_id=group_id)
 
+    # Сообщения
     total_messages = Message.objects.filter(group=group, sender=user).count()
-
     end_date = datetime.now().date()
     start_date = end_date - timedelta(days=6)
-
     daily_messages = (
         Message.objects.filter(
             group=group,
@@ -123,17 +122,39 @@ def user_activity(request, group_id, user_id):
         .annotate(count=Count('id'))
         .order_by('date')
     )
-
-    date_counts = {str(item['date']): item['count'] for item in daily_messages}
+    message_date_counts = {str(item['date']): item['count'] for item in daily_messages}
     labels = [(start_date + timedelta(days=i)).strftime('%Y-%m-%d') for i in range(7)]
-    data = [date_counts.get(label, 0) for label in labels]
+    message_data = [message_date_counts.get(label, 0) for label in labels]
+
+    # Время (в минутах)
+    total_duration = GroupActivity.objects.filter(
+        group=group, user=user, duration__isnull=False
+    ).aggregate(total=Sum('duration'))['total'] or timedelta(seconds=0)
+    daily_duration = (
+        GroupActivity.objects.filter(
+            group=group,
+            user=user,
+            start_time__date__gte=start_date,
+            start_time__date__lte=end_date,
+            duration__isnull=False
+        )
+        .annotate(date=TruncDate('start_time'))
+        .values('date')
+        .annotate(total_duration=Sum('duration'))
+        .order_by('date')
+    )
+    time_date_durations = {str(item['date']): item['total_duration'].total_seconds() / 60 for item in daily_duration}  # В минутах
+    time_data = [time_date_durations.get(label, 0) for label in labels]
 
     context = {
+        'group': group,
         'username': user.username,
         'total_messages': total_messages,
+        'total_duration': total_duration.total_seconds() / 60,  # В минутах
         'graph_data': json.dumps({
             'labels': labels,
-            'data': data
+            'messages': message_data,
+            'minutes': time_data  # Изменено с 'hours' на 'minutes'
         })
     }
     return render(request, 'user_activity.html', context)
