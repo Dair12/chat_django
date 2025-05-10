@@ -131,9 +131,9 @@ def user_activity(request, group_id, user_id):
     context = {
         'username': user.username,
         'total_messages': total_messages,
-        'graph_data': {
+        'graph_data': json.dumps({
             'labels': labels,
             'data': data
-        }
+        })
     }
     return render(request, 'user_activity.html', context)
