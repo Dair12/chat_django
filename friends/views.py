@@ -20,11 +20,14 @@ def new_contact(request):
                 return JsonResponse({'success': False, 'errors': {'username': "You can't add yourself"}})
 
             # Проверяем, не добавлен ли уже
-            exists = Friend.objects.filter(owner=request.user, contact=contact_user).exists()
-            if exists:
+            already_added = Friend.objects.filter(owner=request.user, contact=contact_user).exists()
+            if already_added:
                 return JsonResponse({'success': False, 'errors': {'username': "Contact already exists"}})
 
+            # Добавляем в обе стороны
             Friend.objects.create(owner=request.user, contact=contact_user)
+            Friend.objects.get_or_create(owner=contact_user, contact=request.user)  # чтобы избежать дубликатов
+
             return JsonResponse({'success': True, 'redirect_url': '/home/'})
         except User.DoesNotExist:
             return JsonResponse({'success': False, 'errors': {'username': "User not found"}})
