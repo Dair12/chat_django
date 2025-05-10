@@ -125,8 +125,8 @@ ASGI_APPLICATION = 'chat_django.asgi.application'
 
 STATIC_URL = 'static/'
 
-LOGIN_REDIRECT_URL = '/'
-LOGOUT_REDIRECT_URL = '/accounts/login/'
+# LOGIN_REDIRECT_URL = '/'
+# LOGOUT_REDIRECT_URL = '/accounts/login/'
 STATICFILES_DIRS = [
     BASE_DIR / 'static',
 ]

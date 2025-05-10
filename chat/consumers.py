@@ -6,6 +6,7 @@ from .models import Message
 from groups.models import Group, GroupMember
 from friends.models import Friend
 from django.utils import timezone
+from .utils.translate import translate_message
 
 class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
@@ -62,6 +63,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                     'id': message.id,
                     'sender': message.sender.username,
                     'content': message.content,
+                    'translated_content': message.translated_content,
                     'created_at': message.created_at.isoformat(),
                     'is_read': message.is_read,
                 }
@@ -84,6 +86,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                     'message': {
                         'id': message.id,
                         'content': message.content,
+                        'translated_content': message.translated_content,
                         'updated_at': message.updated_at.isoformat(),
                     }
                 }
@@ -133,15 +136,27 @@ class ChatConsumer(AsyncWebsocketConsumer):
         elif self.chat_type == 'user':
             return user.id == int(self.chat_id) or Friend.objects.filter(owner=user, contact_id=self.chat_id).exists()
         return False
-
+    
     @database_sync_to_async
     def create_message(self, content):
         user = self.scope['user']
         message = Message(sender=user, content=content)
+
+        recipient_lang = 'en'  # Предполагается язык получателя
+        if self.chat_type == 'user':
+            try:
+                recipient = User.objects.get(id=self.chat_id)
+                recipient_lang = 'en'#getattr(recipient.profile, 'language', 'en')  # Предполагается, что у User есть профиль с языком
+            except User.DoesNotExist:
+                recipient_lang = 'en'
+        translated = translate_message(content, recipient_lang)
+        message.translated_content = translated
+
         if self.chat_type == 'group':
             message.group_id = self.chat_id
         elif self.chat_type == 'user':
             message.recipient_id = self.chat_id
+
         message.save()
         return message
 
@@ -151,6 +166,17 @@ class ChatConsumer(AsyncWebsocketConsumer):
         try:
             message = Message.objects.get(id=message_id, sender=user)
             message.content = content
+            recipient_lang = 'en'
+            if self.chat_type == 'user':
+                try:
+                    recipient = User.objects.get(id=self.chat_id)
+                    recipient_lang = 'en'#getattr(recipient.profile, 'language', 'en')
+                except User.DoesNotExist:
+                    recipient_lang = 'en'
+                translated = translate_message(content, recipient_lang)
+                message.translated_content = translated
+            else:
+                message.translated_content = content  # Для групп перевод не нужен
             message.updated_at = timezone.now()
             message.save()
             return message
