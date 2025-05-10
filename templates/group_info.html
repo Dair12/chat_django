@@ -1,0 +1,45 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Group Info</title>
+  <link rel="stylesheet" href="{% static 'css/group_info.css' %}">
+</head>
+<body>
+  <div class="group-info-container">
+    <div class="header">
+      <img src="{% static 'image/back.png' %}" alt="Back" class="back-icon" id="backIcon">
+      <img src="{% static 'image/default_group_avatar.webp' %}" alt="Group Avatar" class="group-avatar" id="groupAvatar">
+      {% if group.owner == user %}
+        <img src="{% static 'image/plus.png' %}" alt="Add" class="add-icon" id="addIcon">
+      {% endif %}
+    </div>
+    {% if group.owner == user %}
+      <input type="text" class="rename-input" value="{{ group.name }}" id="renameInput">
+    {% else %}
+      <h2>{{ group.name }}</h2>
+    {% endif %}
+    <div class="member-section">
+      <h3 id="memberCount">{{ members.count }} members</h3>
+      <div id="memberList" class="member-list">
+        {% for member in members %}
+          <a href="{% url 'user_activity' group.id member.user.id %}" class="member-item-link">
+            <div class="member-item">
+              <img src="{% static 'image/default_user_avatar.webp' %}" alt="Avatar" class="avatar">
+              <span class="username">{{ member.user.username }}</span>
+            </div>
+          </a>
+        {% endfor %}
+      </div>
+    </div>
+    <button id="exitBtn">exit from group</button>
+  </div>
+  <script>
+    const csrfToken = "{{ csrf_token }}";
+    const groupId = "{{ group.id }}";
+    const isOwner = '{% if group.owner == user %}true{% else %}false{% endif %}';
+  </script>
+  <script src="{% static 'js/group_info.js' %}"></script>
+</body>
+</html>
