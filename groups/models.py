@@ -29,6 +29,7 @@ class GroupActivity(models.Model):
     duration = models.DurationField(null=True, blank=True)
 
     def save(self, *args, **kwargs):
+
         if self.end_time and self.start_time:
             if timezone.is_naive(self.start_time):
                 self.start_time = timezone.make_aware(self.start_time)
@@ -37,4 +38,7 @@ class GroupActivity(models.Model):
                 self.end_time = timezone.make_aware(self.end_time)
 
             self.duration = self.end_time - self.start_time
+            print("Start:", self.start_time)
+            print("End:", self.end_time)
+            print("Delta:", self.duration)
         super().save(*args, **kwargs)

@@ -20,6 +20,7 @@
     <a href="{% url 'group_info' group.id %}">Back to Group</a>
   </div>
   <script>
+    console.log(JSON.parse('{{ graph_data|escapejs }}'));
     const graphData = JSON.parse('{{ graph_data|escapejs }}');
   </script>
   <script src="{% static 'js/user_activity.js' %}"></script>

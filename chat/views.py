@@ -5,9 +5,9 @@ from groups.models import Group, GroupActivity
 from friends.models import Friend
 from .models import Message
 from django.db import models
-from datetime import datetime
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
+from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 
 @csrf_exempt
@@ -40,7 +40,7 @@ def chat_view(request, chat_type, chat_id):
 
                 if action in ['heartbeat', 'end_session'] or not action:
                     if activity:
-                        activity.end_time = datetime.now()
+                        activity.end_time = timezone.now()
                         activity.save()
                         print(f"Activity updated: {activity}, Duration: {activity.duration}")  # Отладка
                         return JsonResponse({'success': True})

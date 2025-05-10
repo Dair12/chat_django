@@ -1,4 +1,8 @@
 document.addEventListener('DOMContentLoaded', () => {
+  
+  const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  localStorage.setItem('user_timezone', userTimezone);
+
   const ctx = document.getElementById('activityChart').getContext('2d');
   let chart;
 
