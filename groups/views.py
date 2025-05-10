@@ -1,10 +1,10 @@
-from django.shortcuts import render
-from friends.models import Friend
+from django.shortcuts import render, get_object_or_404, redirect
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import User
-from .models import Group, GroupMember
 from django.views.decorators.csrf import csrf_exempt
+from .models import Group, GroupMember
+from django.contrib.auth.models import User
+from friends.models import Friend
 import json
 
 @csrf_exempt
@@ -34,7 +34,6 @@ def add_group(request):
             for username in member_usernames:
                 try:
                     user = User.objects.get(username=username)
-                    # Verify that the user is a friend
                     if Friend.objects.filter(owner=request.user, contact=user).exists():
                         GroupMember.objects.create(group=group, user=user)
                     else:
@@ -49,3 +48,43 @@ def add_group(request):
             return JsonResponse({'success': False, 'errors': str(e)})
 
     return JsonResponse({'success': False, 'errors': 'Invalid request method'})
+
+@csrf_exempt
+@login_required
+def group_info(request, group_id):
+    group = get_object_or_404(Group, id=group_id)
+    # Check if the user is a member of the group
+    if not GroupMember.objects.filter(group=group, user=request.user).exists():
+        return redirect('home')  # Redirect if not a member
+
+    if request.method == 'GET':
+        members = GroupMember.objects.filter(group=group).select_related('user')
+        context = {
+            'group': group,
+            'members': members,
+            'user': request.user,  # Pass current user for owner check
+        }
+        return render(request, 'group_info.html', context)
+
+    elif request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            action = data.get('action')
+
+            if action == 'rename' and group.owner == request.user:
+                new_name = data.get('name')
+                if new_name:
+                    group.name = new_name
+                    group.save()
+                    return JsonResponse({'success': True})
+                else:
+                    return JsonResponse({'success': False, 'error': 'Name cannot be empty'})
+            
+            elif action == 'exit':
+                GroupMember.objects.filter(group=group, user=request.user).delete()
+                return JsonResponse({'success': True, 'redirect_url': '/home/'})
+            
+            else:
+                return JsonResponse({'success': False, 'error': 'Invalid action or permission denied'})
+        except json.JSONDecodeError:
+            return JsonResponse({'success': False, 'error': 'Invalid JSON'})

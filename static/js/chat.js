@@ -41,7 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
       e.preventDefault();
       e.stopPropagation();
       if (isGroup) {
-        window.location.href = `group_info?group_id=${chatId}`;
+        window.location.href = `/group_info/${chatId}/`;
       } else {
         alert('Это не групповой чат.');
       }
@@ -275,12 +275,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Scroll to bottom
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
-
-    // document.querySelectorAll('.message.incoming').forEach(messageDiv => {
-    //   if (!messageDiv.classList.contains('read')) {
-    //     observer.observe(messageDiv);
-    //   }
-    // });
 
     document.addEventListener('click', (event) => {
       if (event.target.classList.contains('toggle-original-btn')) {
