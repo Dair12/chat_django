@@ -13,8 +13,8 @@
     <p>Total Messages: {{ total_messages }}</p>
     <p>Total Time Spent: {{ total_duration|floatformat:2 }} minutes</p>
     <div class="chart-controls">
-      <button id="showMessages" class="active">Messages per Day</button>
-      <button id="showMinutes">Minutes per Day</button>
+      <button id="showMessages" class="active">Messages</button>
+      <button id="showMinutes">Time</button>
     </div>
     <canvas id="activityChart" width="400" height="200"></canvas>
     <a href="{% url 'group_info' group.id %}">Back to Group</a>
