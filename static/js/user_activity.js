@@ -6,6 +6,16 @@ document.addEventListener('DOMContentLoaded', () => {
   const ctx = document.getElementById('activityChart').getContext('2d');
   let chart;
 
+  function showMetrics(type) {
+    const messagesMetrics = document.querySelector('.messages-metrics');
+    const timeMetrics = document.querySelector('.time-metrics');
+    const attendanceMetrics = document.querySelector('.attendance-metrics');
+
+    messagesMetrics.style.display = type === 'messages' ? 'block' : 'none';
+    timeMetrics.style.display = type === 'time' ? 'block' : 'none';
+    attendanceMetrics.style.display = type === 'attendance' ? 'block' : 'none';
+  }
+
   // Функция для инициализации/обновления графика
   function updateChart(dataType) {
     let datasetLabel, yAxisLabel, data;
@@ -14,14 +24,17 @@ document.addEventListener('DOMContentLoaded', () => {
       datasetLabel = 'Messages per Day';
       yAxisLabel = 'Messages';
       data = graphData.messages;
+      showMetrics('messages'); // Добавлено
     } else if (dataType === 'minutes') {
       datasetLabel = 'Minutes per Day';
       yAxisLabel = 'Minutes';
       data = graphData.minutes;
+      showMetrics('time'); // Добавлено
     } else if (dataType === 'attendance') {
       datasetLabel = 'Sessions per Day';
       yAxisLabel = 'Sessions';
       data = graphData.attendance;
+      showMetrics('attendance'); // Добавлено
     } else {
       return;
     }
