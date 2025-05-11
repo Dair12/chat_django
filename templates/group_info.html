@@ -10,7 +10,9 @@
   <div class="group-info-container">
     <div class="header">
       <img src="{% static 'image/back.png' %}" alt="Back" class="back-icon" id="backIcon">
-      <img src="{% static 'image/default_group_avatar.webp' %}" alt="Group Avatar" class="group-avatar" id="groupAvatar">
+      <a href="{% url 'group_activity' group.id %}">
+        <img src="{% static 'image/default_group_avatar.webp' %}" alt="Group Avatar" class="group-avatar" id="groupAvatar">
+      </a>
       {% if group.owner == user %}
         <img src="{% static 'image/plus.png' %}" alt="Add" class="add-icon" id="addIcon">
       {% endif %}

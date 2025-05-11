@@ -196,3 +196,130 @@ def user_activity(request, group_id, user_id):
         })
     }
     return render(request, 'user_activity.html', context)
+
+@login_required
+def group_activity(request, group_id):
+    group = get_object_or_404(Group, id=group_id)
+    if not GroupMember.objects.filter(group=group, user=request.user).exists():
+        return redirect('home')
+
+    members = GroupMember.objects.filter(group=group).select_related('user')
+    member_ids = members.values_list('user_id', flat=True)
+    num_members = members.count()
+
+    end_date = datetime.now().date()
+    start_date = end_date - timedelta(days=6)
+
+    # Messages
+    total_messages = Message.objects.filter(
+        group=group, sender__in=member_ids, created_at__date__gte=start_date, created_at__date__lte=end_date
+    ).count()
+    daily_messages = (
+        Message.objects.filter(
+            group=group, sender__in=member_ids, created_at__date__gte=start_date, created_at__date__lte=end_date
+        )
+        .annotate(date=TruncDate('created_at'))
+        .values('date')
+        .annotate(count=Count('id'))
+        .order_by('date')
+    )
+    message_date_counts = {str(item['date']): item['count'] for item in daily_messages}
+    labels = [(start_date + timedelta(days=i)).strftime('%Y-%m-%d') for i in range(7)]
+    message_data = [message_date_counts.get(label, 0) / num_members for label in labels]
+    average_messages = sum(message_data) / 7 if message_data else 0
+
+    # Time
+    total_duration = GroupActivity.objects.filter(
+        group=group, user__in=member_ids, start_time__date__gte=start_date, start_time__date__lte=end_date, duration__isnull=False
+    ).aggregate(total=Sum('duration'))['total'] or timedelta(seconds=0)
+    total_duration_minutes = total_duration.total_seconds() / 60 / num_members
+    daily_duration = (
+        GroupActivity.objects.filter(
+            group=group, user__in=member_ids, start_time__date__gte=start_date, start_time__date__lte=end_date, duration__isnull=False
+        )
+        .annotate(date=TruncDate('start_time'))
+        .values('date')
+        .annotate(total_duration=Sum('duration'))
+        .order_by('date')
+    )
+    time_date_durations = {str(item['date']): item['total_duration'].total_seconds() / 60 / num_members for item in daily_duration}
+    time_data = [time_date_durations.get(label, 0) for label in labels]
+    average_time = sum(time_data) / 7 if time_data else 0
+
+    # Attendance
+    daily_attendance = (
+        GroupActivity.objects.filter(
+            group=group, user__in=member_ids, start_time__date__gte=start_date, start_time__date__lte=end_date
+        )
+        .annotate(date=TruncDate('start_time'))
+        .values('date')
+        .annotate(count=Count('id'))
+        .order_by('date')
+    )
+    attendance_date_counts = {str(item['date']): item['count'] / num_members for item in daily_attendance}
+    attendance_data = [attendance_date_counts.get(label, 0) for label in labels]
+    average_attendance = sum(attendance_data) / 7 if attendance_data else 0
+    total_attendance = sum(attendance_data)
+
+    # Average session duration
+    session_durations = GroupActivity.objects.filter(
+        group=group, user__in=member_ids, start_time__date__gte=start_date, start_time__date__lte=end_date, duration__isnull=False
+    ).aggregate(avg_duration=Avg('duration'))['avg_duration'] or timedelta(seconds=0)
+    average_session_duration = session_durations.total_seconds() / 60 if session_durations else 0
+
+    # Interest as slope of time trend (linear regression)
+    x_vals = list(range(7))
+    y_vals = time_data
+    n = len(x_vals)
+    sum_x = sum(x_vals)
+    sum_y = sum(y_vals)
+    sum_x2 = sum(x**2 for x in x_vals)
+    sum_xy = sum(x * y for x, y in zip(x_vals, y_vals))
+    denominator = n * sum_x2 - sum_x ** 2
+    if denominator == 0:
+        interest = 0
+    else:
+        k = (n * sum_xy - sum_x * sum_y) / denominator
+        interest = k
+
+    # Activity Types
+    activity_types = {'Active_Communicator': 0, 'Passive_Reader': 0, 'Balanced': 0}
+    for user in members.values('user'):
+        user_id = user['user']
+        user_total_messages = Message.objects.filter(
+            group=group, sender_id=user_id, created_at__date__gte=start_date, created_at__date__lte=end_date
+        ).count()
+        user_total_duration = GroupActivity.objects.filter(
+            group=group, user_id=user_id, start_time__date__gte=start_date, start_time__date__lte=end_date, duration__isnull=False
+        ).aggregate(total=Sum('duration'))['total'] or timedelta(seconds=0)
+        user_total_duration_minutes = user_total_duration.total_seconds() / 60
+        if user_total_duration_minutes > 0:
+            messages_per_minute = user_total_messages / user_total_duration_minutes
+        else:
+            messages_per_minute = float('inf') if user_total_messages > 0 else 0
+        if messages_per_minute > 0.5:
+            activity_types['Active_Communicator'] += 1
+        elif messages_per_minute < 0.1 and user_total_duration_minutes > 0:
+            activity_types['Passive_Reader'] += 1
+        else:
+            activity_types['Balanced'] += 1
+
+    context = {
+        'group': group,
+        'total_messages': total_messages / num_members,
+        'total_duration': total_duration_minutes,
+        'total_attendance': total_attendance,
+        'average_messages': average_messages,
+        'average_time': average_time,
+        'average_attendance': average_attendance,
+        'average_session_duration': average_session_duration,
+        'interest': interest,
+        'activity_types': activity_types,
+        'graph_data': json.dumps({
+            'labels': labels,
+            'messages': message_data,
+            'minutes': time_data,
+            'attendance': attendance_data
+        })
+    }
+    return render(request, 'group_activity.html', context)

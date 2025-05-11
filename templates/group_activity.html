@@ -1,0 +1,53 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Group Activity</title>
+  <link rel="stylesheet" href="{% static 'css/user_activity.css' %}">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <div class="activity-container">
+    <h3>Group Activity in {{ group.name }}</h3>
+    <div class="metrics">
+      <div class="metric-group messages-metrics">
+        <p class="metric">Average Messages per Member: {{ total_messages|floatformat:2 }}</p>
+        <p class="metric">Average Messages per Day: {{ average_messages|floatformat:2 }}</p>
+      </div>
+      <div class="metric-group time-metrics" style="display: none;">
+        <p class="metric">Average Time per Member: {{ total_duration|floatformat:2 }} minutes</p>
+        <p class="metric">Average Time per Day: {{ average_time|floatformat:2 }} minutes</p>
+        <p class="metric">
+          Interest: 
+          <span class="{% if interest >= 0 %}interest-positive{% else %}interest-negative{% endif %}">
+            {{ interest|floatformat:2 }}
+          </span>
+        </p>
+      </div>
+      <div class="metric-group attendance-metrics" style="display: none;">
+        <p class="metric">Average Attendance per Member: {{ total_attendance|floatformat:2 }} sessions</p>
+        <p class="metric">Average Attendance per Day: {{ average_attendance|floatformat:2 }} sessions</p>
+        <p class="metric">Average Session Duration: {{ average_session_duration|floatformat:2 }} minutes</p>
+      </div>
+      <div class="metric-group activity-type-metrics">
+        <p class="metric">Activity Types:</p>
+        <p class="metric">Active Communicators: {{ activity_types.Active_Communicator }}</p>
+        <p class="metric">Passive Readers: {{ activity_types.Passive_Reader }}</p>
+        <p class="metric">Balanced: {{ activity_types.Balanced }}</p>
+      </div>
+    </div>
+    <div class="chart-controls">
+      <button id="showMessages" class="chart-btn active">Messages</button>
+      <button id="showMinutes" class="chart-btn">Time</button>
+      <button id="showAttendance" class="chart-btn">Attendance</button>
+    </div>
+    <canvas id="activityChart" width="400" height="200"></canvas>
+    <a href="{% url 'group_info' group.id %}">Back to Group</a>
+  </div>
+  <script>
+    const graphData = JSON.parse('{{ graph_data|escapejs }}');
+  </script>
+  <script src="{% static 'js/user_activity.js' %}"></script>
+</body>
+</html>
