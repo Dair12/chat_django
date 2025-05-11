@@ -1,20 +1,43 @@
 document.addEventListener('DOMContentLoaded', () => {
-  
   const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
   localStorage.setItem('user_timezone', userTimezone);
 
   const ctx = document.getElementById('activityChart').getContext('2d');
   let chart;
 
-  // Функция для инициализации/обновления графика
+  function showMetrics(type) {
+    const messagesMetrics = document.querySelector('.messages-metrics');
+    const timeMetrics = document.querySelector('.time-metrics');
+    const attendanceMetrics = document.querySelector('.attendance-metrics');
+
+    messagesMetrics.style.display = type === 'messages' ? 'block' : 'none';
+    timeMetrics.style.display = type === 'minutes' ? 'block' : 'none';
+    attendanceMetrics.style.display = type === 'attendance' ? 'block' : 'none';
+  }
+
   function updateChart(dataType) {
-    const isMessages = dataType === 'messages';
-    const datasetLabel = isMessages ? 'Messages per Day' : 'Minutes per Day';
-    const yAxisLabel = isMessages ? 'Messages' : 'Minutes';
-    const data = isMessages ? graphData.messages : graphData.minutes;
+    let datasetLabel, yAxisLabel, data;
+
+    if (dataType === 'messages') {
+      datasetLabel = 'Messages per Day';
+      yAxisLabel = 'Messages';
+      data = graphData.messages;
+    } else if (dataType === 'minutes') {
+      datasetLabel = 'Minutes per Day';
+      yAxisLabel = 'Minutes';
+      data = graphData.minutes;
+    } else if (dataType === 'attendance') {
+      datasetLabel = 'Sessions per Day';
+      yAxisLabel = 'Sessions';
+      data = graphData.attendance;
+    } else {
+      return;
+    }
+
+    showMetrics(dataType);
 
     if (chart) {
-      chart.destroy(); // Уничтожаем предыдущий график
+      chart.destroy();
     }
 
     chart = new Chart(ctx, {
@@ -49,22 +72,15 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Инициализация графика с сообщениями по умолчанию
   updateChart('messages');
 
-  // Обработчики кнопок
-  const messagesButton = document.getElementById('showMessages');
-  const minutesButton = document.getElementById('showMinutes');
-
-  messagesButton.addEventListener('click', () => {
-    updateChart('messages');
-    messagesButton.classList.add('active');
-    minutesButton.classList.remove('active');
-  });
-
-  minutesButton.addEventListener('click', () => {
-    updateChart('minutes');
-    minutesButton.classList.add('active');
-    messagesButton.classList.remove('active');
+  const chartButtons = document.querySelectorAll('.chart-btn');
+  chartButtons.forEach(button => {
+    button.addEventListener('click', () => {
+      const dataType = button.id.replace('show', '').toLowerCase();
+      updateChart(dataType);
+      chartButtons.forEach(btn => btn.classList.remove('active'));
+      button.classList.add('active');
+    });
   });
 });
