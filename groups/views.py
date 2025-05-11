@@ -162,11 +162,15 @@ def user_activity(request, group_id, user_id):
     attendance_date_counts = {str(item['date']): item['count'] for item in daily_attendance}
     attendance_data = [attendance_date_counts.get(label, 0) for label in labels]
 
+    # Общее количество сеансов (Total Attendance)
+    total_attendance = GroupActivity.objects.filter(group=group, user=user).count()
+
     context = {
         'group': group,
         'username': user.username,
         'total_messages': total_messages,
         'total_duration': total_duration.total_seconds() / 60,  # В минутах
+        'total_attendance': total_attendance,
         'graph_data': json.dumps({
             'labels': labels,
             'messages': message_data,
