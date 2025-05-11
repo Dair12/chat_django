@@ -6,7 +6,7 @@ from .models import Group, GroupMember, GroupActivity
 from django.contrib.auth.models import User
 from friends.models import Friend
 from chat.models import Message
-from django.db.models import Count, Sum
+from django.db.models import Count, Sum, Avg
 from django.db.models.functions import TruncDate
 import json
 from datetime import datetime, timedelta
@@ -15,7 +15,6 @@ from datetime import datetime, timedelta
 @login_required
 def add_group(request):
     if request.method == 'GET':
-        # Fetch all friends of the authenticated user
         friends = Friend.objects.filter(owner=request.user).select_related('contact')
         return render(request, 'add_group.html', {'friends': friends})
     
@@ -24,17 +23,10 @@ def add_group(request):
             data = json.loads(request.body)
             group_name = data.get('group_name')
             member_usernames = data.get('members', [])
-
             if not group_name:
                 return JsonResponse({'success': False, 'errors': 'Group name is required'})
-
-            # Create the group
             group = Group.objects.create(name=group_name, owner=request.user)
-
-            # Add the owner as a member
             GroupMember.objects.create(group=group, user=request.user)
-
-            # Add selected friends as members
             for username in member_usernames:
                 try:
                     user = User.objects.get(username=username)
@@ -44,37 +36,31 @@ def add_group(request):
                         return JsonResponse({'success': False, 'errors': f'{username} is not your friend'})
                 except User.DoesNotExist:
                     return JsonResponse({'success': False, 'errors': f'User {username} not found'})
-
             return JsonResponse({'success': True, 'redirect_url': '/home/'})
         except json.JSONDecodeError:
             return JsonResponse({'success': False, 'errors': 'Invalid data'})
         except Exception as e:
             return JsonResponse({'success': False, 'errors': str(e)})
-
     return JsonResponse({'success': False, 'errors': 'Invalid request method'})
 
 @csrf_exempt
 @login_required
 def group_info(request, group_id):
     group = get_object_or_404(Group, id=group_id)
-    # Check if the user is a member of the group
     if not GroupMember.objects.filter(group=group, user=request.user).exists():
-        return redirect('home')  # Redirect if not a member
-
+        return redirect('home')
     if request.method == 'GET':
         members = GroupMember.objects.filter(group=group).select_related('user')
         context = {
             'group': group,
             'members': members,
-            'user': request.user,  # Pass current user for owner check
+            'user': request.user,
         }
         return render(request, 'group_info.html', context)
-
     elif request.method == 'POST':
         try:
             data = json.loads(request.body)
             action = data.get('action')
-
             if action == 'rename' and group.owner == request.user:
                 new_name = data.get('name')
                 if new_name:
@@ -83,11 +69,9 @@ def group_info(request, group_id):
                     return JsonResponse({'success': True})
                 else:
                     return JsonResponse({'success': False, 'error': 'Name cannot be empty'})
-            
             elif action == 'exit':
                 GroupMember.objects.filter(group=group, user=request.user).delete()
                 return JsonResponse({'success': True, 'redirect_url': '/home/'})
-            
             else:
                 return JsonResponse({'success': False, 'error': 'Invalid action or permission denied'})
         except json.JSONDecodeError:
@@ -97,25 +81,22 @@ def group_info(request, group_id):
 @login_required
 def user_activity(request, group_id, user_id):
     group = get_object_or_404(Group, id=group_id)
-
     if group.owner != request.user:
         return redirect('group_info', group_id=group_id)
-
     user = get_object_or_404(User, id=user_id)
-
     if not GroupMember.objects.filter(group=group, user=user).exists():
         return redirect('group_info', group_id=group_id)
 
-    # Сообщения
-    total_messages = Message.objects.filter(group=group, sender=user).count()
     end_date = datetime.now().date()
     start_date = end_date - timedelta(days=6)
+
+    total_messages = Message.objects.filter(
+        group=group, sender=user, created_at__date__gte=start_date, created_at__date__lte=end_date
+    ).count()
+
     daily_messages = (
         Message.objects.filter(
-            group=group,
-            sender=user,
-            created_at__date__gte=start_date,
-            created_at__date__lte=end_date
+            group=group, sender=user, created_at__date__gte=start_date, created_at__date__lte=end_date
         )
         .annotate(date=TruncDate('created_at'))
         .values('date')
@@ -125,34 +106,29 @@ def user_activity(request, group_id, user_id):
     message_date_counts = {str(item['date']): item['count'] for item in daily_messages}
     labels = [(start_date + timedelta(days=i)).strftime('%Y-%m-%d') for i in range(7)]
     message_data = [message_date_counts.get(label, 0) for label in labels]
+    average_messages = sum(message_data) / 7 if message_data else 0
 
-    # Время (в минутах)
     total_duration = GroupActivity.objects.filter(
-        group=group, user=user, duration__isnull=False
+        group=group, user=user, start_time__date__gte=start_date, start_time__date__lte=end_date, duration__isnull=False
     ).aggregate(total=Sum('duration'))['total'] or timedelta(seconds=0)
+    total_duration_minutes = total_duration.total_seconds() / 60
+
     daily_duration = (
         GroupActivity.objects.filter(
-            group=group,
-            user=user,
-            start_time__date__gte=start_date,
-            start_time__date__lte=end_date,
-            duration__isnull=False
+            group=group, user=user, start_time__date__gte=start_date, start_time__date__lte=end_date, duration__isnull=False
         )
         .annotate(date=TruncDate('start_time'))
         .values('date')
         .annotate(total_duration=Sum('duration'))
         .order_by('date')
     )
-    time_date_durations = {str(item['date']): item['total_duration'].total_seconds() / 60 for item in daily_duration}  # В минутах
+    time_date_durations = {str(item['date']): item['total_duration'].total_seconds() / 60 for item in daily_duration}
     time_data = [time_date_durations.get(label, 0) for label in labels]
+    average_time = sum(time_data) / 7 if time_data else 0
 
-    # Посещаемость (количество сеансов в день)
     daily_attendance = (
         GroupActivity.objects.filter(
-            group=group,
-            user=user,
-            start_time__date__gte=start_date,
-            start_time__date__lte=end_date
+            group=group, user=user, start_time__date__gte=start_date, start_time__date__lte=end_date
         )
         .annotate(date=TruncDate('start_time'))
         .values('date')
@@ -161,16 +137,23 @@ def user_activity(request, group_id, user_id):
     )
     attendance_date_counts = {str(item['date']): item['count'] for item in daily_attendance}
     attendance_data = [attendance_date_counts.get(label, 0) for label in labels]
+    average_attendance = sum(attendance_data) / 7 if attendance_data else 0
 
-    # Общее количество сеансов (Total Attendance)
-    total_attendance = GroupActivity.objects.filter(group=group, user=user).count()
+    session_durations = GroupActivity.objects.filter(
+        group=group, user=user, start_time__date__gte=start_date, start_time__date__lte=end_date, duration__isnull=False
+    ).aggregate(avg_duration=Avg('duration'))['avg_duration'] or timedelta(seconds=0)
+    average_session_duration = session_durations.total_seconds() / 60 if session_durations else 0
 
     context = {
         'group': group,
         'username': user.username,
         'total_messages': total_messages,
-        'total_duration': total_duration.total_seconds() / 60,  # В минутах
-        'total_attendance': total_attendance,
+        'total_duration': total_duration_minutes,
+        'total_attendance': sum(attendance_data),
+        'average_messages': average_messages,
+        'average_time': average_time,
+        'average_attendance': average_attendance,
+        'average_session_duration': average_session_duration,
         'graph_data': json.dumps({
             'labels': labels,
             'messages': message_data,

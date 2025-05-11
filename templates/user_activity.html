@@ -10,9 +10,13 @@
 <body>
   <div class="activity-container">
     <h3>{{ username }}'s Activity in {{ group.name }}</h3>
-    <p>Total Messages: {{ total_messages }}</p>
-    <p>Total Time Spent: {{ total_duration|floatformat:2 }} minutes</p>
-    <p>Total Attendance: {{ total_attendance }} sessions</p>
+    <p>Total Messages (last 7 days): {{ total_messages }}</p>
+    <p>Average Messages per Day: {{ average_messages|floatformat:2 }}</p>
+    <p>Total Time Spent (last 7 days): {{ total_duration|floatformat:2 }} minutes</p>
+    <p>Average Time per Day: {{ average_time|floatformat:2 }} minutes</p>
+    <p>Total Attendance (last 7 days): {{ total_attendance }} sessions</p>
+    <p>Average Attendance per Day: {{ average_attendance|floatformat:2 }} sessions</p>
+    <p>Average Session Duration: {{ average_session_duration|floatformat:2 }} minutes</p>
     <div class="chart-controls">
       <button id="showMessages" class="chart-btn active">Messages</button>
       <button id="showMinutes" class="chart-btn">Time</button>
