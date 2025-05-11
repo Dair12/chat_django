@@ -147,24 +147,23 @@ def user_activity(request, group_id, user_id):
     ).aggregate(avg_duration=Avg('duration'))['avg_duration'] or timedelta(seconds=0)
     average_session_duration = session_durations.total_seconds() / 60 if session_durations else 0
 
-    # Interest (рост/падение времени за последние 7 дней)
-    first_3_days_end = start_date + timedelta(days=2)  # Дни 1-3
-    last_3_days_start = end_date - timedelta(days=2)   # Дни 5-7
-    first_3_days_duration = GroupActivity.objects.filter(
-        group=group, user=user, start_time__date__gte=start_date, start_time__date__lte=first_3_days_end, duration__isnull=False
-    ).aggregate(total=Sum('duration'))['total'] or timedelta(seconds=0)
-    last_3_days_duration = GroupActivity.objects.filter(
-        group=group, user=user, start_time__date__gte=last_3_days_start, start_time__date__lte=end_date, duration__isnull=False
-    ).aggregate(total=Sum('duration'))['total'] or timedelta(seconds=0)
-    
-    first_3_days_minutes = first_3_days_duration.total_seconds() / 60
-    last_3_days_minutes = last_3_days_duration.total_seconds() / 60
-    avg_first_3_days = first_3_days_minutes / 3 if first_3_days_minutes > 0 else 0  # Изменено с 1 на 0
-    avg_last_3_days = last_3_days_minutes / 3
-    if avg_first_3_days == 0 and avg_last_3_days > 0:
-        interest = (avg_last_3_days / (1 if avg_first_3_days == 0 else avg_first_3_days)) * 100  # Рост от 0
+    # Interest как наклон тренда по времени (линейная регрессия)
+    x_vals = list(range(7))
+    y_vals = time_data
+
+    n = len(x_vals)
+    sum_x = sum(x_vals)
+    sum_y = sum(y_vals)
+    sum_x2 = sum(x**2 for x in x_vals)
+    sum_xy = sum(x * y for x, y in zip(x_vals, y_vals))
+
+    denominator = n * sum_x2 - sum_x ** 2
+    if denominator == 0:
+        interest = 0
     else:
-        interest = ((avg_last_3_days - avg_first_3_days) / avg_first_3_days) * 100 if avg_first_3_days > 0 else 0
+        k = (n * sum_xy - sum_x * sum_y) / denominator
+        interest = k
+
 
     context = {
         'group': group,
