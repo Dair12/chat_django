@@ -146,6 +146,22 @@ def user_activity(request, group_id, user_id):
     time_date_durations = {str(item['date']): item['total_duration'].total_seconds() / 60 for item in daily_duration}  # В минутах
     time_data = [time_date_durations.get(label, 0) for label in labels]
 
+    # Посещаемость (количество сеансов в день)
+    daily_attendance = (
+        GroupActivity.objects.filter(
+            group=group,
+            user=user,
+            start_time__date__gte=start_date,
+            start_time__date__lte=end_date
+        )
+        .annotate(date=TruncDate('start_time'))
+        .values('date')
+        .annotate(count=Count('id'))
+        .order_by('date')
+    )
+    attendance_date_counts = {str(item['date']): item['count'] for item in daily_attendance}
+    attendance_data = [attendance_date_counts.get(label, 0) for label in labels]
+
     context = {
         'group': group,
         'username': user.username,
@@ -154,7 +170,8 @@ def user_activity(request, group_id, user_id):
         'graph_data': json.dumps({
             'labels': labels,
             'messages': message_data,
-            'minutes': time_data  # Изменено с 'hours' на 'minutes'
+            'minutes': time_data,
+            'attendance': attendance_data
         })
     }
     return render(request, 'user_activity.html', context)
