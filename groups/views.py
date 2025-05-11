@@ -90,10 +90,10 @@ def user_activity(request, group_id, user_id):
     end_date = datetime.now().date()
     start_date = end_date - timedelta(days=6)
 
+    # Сообщения
     total_messages = Message.objects.filter(
         group=group, sender=user, created_at__date__gte=start_date, created_at__date__lte=end_date
     ).count()
-
     daily_messages = (
         Message.objects.filter(
             group=group, sender=user, created_at__date__gte=start_date, created_at__date__lte=end_date
@@ -108,11 +108,11 @@ def user_activity(request, group_id, user_id):
     message_data = [message_date_counts.get(label, 0) for label in labels]
     average_messages = sum(message_data) / 7 if message_data else 0
 
+    # Время
     total_duration = GroupActivity.objects.filter(
         group=group, user=user, start_time__date__gte=start_date, start_time__date__lte=end_date, duration__isnull=False
     ).aggregate(total=Sum('duration'))['total'] or timedelta(seconds=0)
     total_duration_minutes = total_duration.total_seconds() / 60
-
     daily_duration = (
         GroupActivity.objects.filter(
             group=group, user=user, start_time__date__gte=start_date, start_time__date__lte=end_date, duration__isnull=False
@@ -126,6 +126,7 @@ def user_activity(request, group_id, user_id):
     time_data = [time_date_durations.get(label, 0) for label in labels]
     average_time = sum(time_data) / 7 if time_data else 0
 
+    # Посещаемость
     daily_attendance = (
         GroupActivity.objects.filter(
             group=group, user=user, start_time__date__gte=start_date, start_time__date__lte=end_date
@@ -138,22 +139,44 @@ def user_activity(request, group_id, user_id):
     attendance_date_counts = {str(item['date']): item['count'] for item in daily_attendance}
     attendance_data = [attendance_date_counts.get(label, 0) for label in labels]
     average_attendance = sum(attendance_data) / 7 if attendance_data else 0
+    total_attendance = sum(attendance_data)
 
+    # Средняя длительность сеанса
     session_durations = GroupActivity.objects.filter(
         group=group, user=user, start_time__date__gte=start_date, start_time__date__lte=end_date, duration__isnull=False
     ).aggregate(avg_duration=Avg('duration'))['avg_duration'] or timedelta(seconds=0)
     average_session_duration = session_durations.total_seconds() / 60 if session_durations else 0
+
+    # Interest (рост/падение времени за последние 7 дней)
+    first_3_days_end = start_date + timedelta(days=2)  # Дни 1-3
+    last_3_days_start = end_date - timedelta(days=2)   # Дни 5-7
+    first_3_days_duration = GroupActivity.objects.filter(
+        group=group, user=user, start_time__date__gte=start_date, start_time__date__lte=first_3_days_end, duration__isnull=False
+    ).aggregate(total=Sum('duration'))['total'] or timedelta(seconds=0)
+    last_3_days_duration = GroupActivity.objects.filter(
+        group=group, user=user, start_time__date__gte=last_3_days_start, start_time__date__lte=end_date, duration__isnull=False
+    ).aggregate(total=Sum('duration'))['total'] or timedelta(seconds=0)
+    
+    first_3_days_minutes = first_3_days_duration.total_seconds() / 60
+    last_3_days_minutes = last_3_days_duration.total_seconds() / 60
+    avg_first_3_days = first_3_days_minutes / 3 if first_3_days_minutes > 0 else 0  # Изменено с 1 на 0
+    avg_last_3_days = last_3_days_minutes / 3
+    if avg_first_3_days == 0 and avg_last_3_days > 0:
+        interest = (avg_last_3_days / (1 if avg_first_3_days == 0 else avg_first_3_days)) * 100  # Рост от 0
+    else:
+        interest = ((avg_last_3_days - avg_first_3_days) / avg_first_3_days) * 100 if avg_first_3_days > 0 else 0
 
     context = {
         'group': group,
         'username': user.username,
         'total_messages': total_messages,
         'total_duration': total_duration_minutes,
-        'total_attendance': sum(attendance_data),
+        'total_attendance': total_attendance,
         'average_messages': average_messages,
         'average_time': average_time,
         'average_attendance': average_attendance,
         'average_session_duration': average_session_duration,
+        'interest': interest,
         'graph_data': json.dumps({
             'labels': labels,
             'messages': message_data,

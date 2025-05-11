@@ -18,6 +18,12 @@
       <div class="metric-group time-metrics" style="display: none;">
         <p class="metric">Total Time Spent (last 7 days): {{ total_duration|floatformat:2 }} minutes</p>
         <p class="metric">Average Time per Day: {{ average_time|floatformat:2 }} minutes</p>
+        <p class="metric">
+          Interest: 
+          <span class="{% if interest >= 0 %}interest-positive{% else %}interest-negative{% endif %}">
+            {{ interest|floatformat:2 }}%
+          </span>
+        </p>
       </div>
       <div class="metric-group attendance-metrics" style="display: none;">
         <p class="metric">Total Attendance (last 7 days): {{ total_attendance }} sessions</p>

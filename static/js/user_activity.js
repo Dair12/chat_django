@@ -1,5 +1,4 @@
 document.addEventListener('DOMContentLoaded', () => {
-  
   const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
   localStorage.setItem('user_timezone', userTimezone);
 
@@ -12,11 +11,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const attendanceMetrics = document.querySelector('.attendance-metrics');
 
     messagesMetrics.style.display = type === 'messages' ? 'block' : 'none';
-    timeMetrics.style.display = type === 'time' ? 'block' : 'none';
+    timeMetrics.style.display = type === 'minutes' ? 'block' : 'none';
     attendanceMetrics.style.display = type === 'attendance' ? 'block' : 'none';
   }
 
-  // Функция для инициализации/обновления графика
   function updateChart(dataType) {
     let datasetLabel, yAxisLabel, data;
 
@@ -24,23 +22,22 @@ document.addEventListener('DOMContentLoaded', () => {
       datasetLabel = 'Messages per Day';
       yAxisLabel = 'Messages';
       data = graphData.messages;
-      showMetrics('messages'); // Добавлено
     } else if (dataType === 'minutes') {
       datasetLabel = 'Minutes per Day';
       yAxisLabel = 'Minutes';
       data = graphData.minutes;
-      showMetrics('time'); // Добавлено
     } else if (dataType === 'attendance') {
       datasetLabel = 'Sessions per Day';
       yAxisLabel = 'Sessions';
       data = graphData.attendance;
-      showMetrics('attendance'); // Добавлено
     } else {
       return;
     }
 
+    showMetrics(dataType);
+
     if (chart) {
-      chart.destroy(); // Уничтожаем предыдущий график
+      chart.destroy();
     }
 
     chart = new Chart(ctx, {
@@ -75,15 +72,12 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Инициализация графика с сообщениями по умолчанию
   updateChart('messages');
 
-  // Обработчики кнопок
   const chartButtons = document.querySelectorAll('.chart-btn');
-
   chartButtons.forEach(button => {
     button.addEventListener('click', () => {
-      const dataType = button.id.replace('show', '').toLowerCase(); // showMessages -> messages
+      const dataType = button.id.replace('show', '').toLowerCase();
       updateChart(dataType);
       chartButtons.forEach(btn => btn.classList.remove('active'));
       button.classList.add('active');
