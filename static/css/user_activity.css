@@ -23,9 +23,17 @@ body {
   margin-bottom: 10px;
 }
 
-.activity-container p {
-  font-size: 16px;
+.metrics {
+  margin-bottom: 20px;
+}
+
+.metric-group {
   margin-bottom: 10px;
+}
+
+.metric {
+  font-size: 16px;
+  margin: 5px 0;
 }
 
 .chart-controls {
@@ -62,4 +70,29 @@ a {
 
 a:hover {
   text-decoration: underline;
+}
+
+.interest-positive {
+  color: #28a745; /* Green */
+  font-weight: bold;
+}
+
+.interest-negative {
+  color: #dc3545; /* Red */
+  font-weight: bold;
+}
+
+.activity-active-communicator {
+  color: #007bff; /* Blue */
+  font-weight: bold;
+}
+
+.activity-passive-reader {
+  color: #ffc107; /* Yellow */
+  font-weight: bold;
+}
+
+.activity-balanced {
+  color: #28a745; /* Green */
+  font-weight: bold;
 }

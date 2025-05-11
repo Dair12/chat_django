@@ -142,15 +142,18 @@ class ChatConsumer(AsyncWebsocketConsumer):
         user = self.scope['user']
         message = Message(sender=user, content=content)
 
-        recipient_lang = 'en'  # Предполагается язык получателя
-        if self.chat_type == 'user':
+        if self.chat_type == 'group':
+            # Переводим на английский для групповых чатов
+            translated = translate_message(content, 'en')
+            message.translated_content = translated
+        elif self.chat_type == 'user':
             try:
                 recipient = User.objects.get(id=self.chat_id)
-                recipient_lang = 'en'#getattr(recipient.profile, 'language', 'en')  # Предполагается, что у User есть профиль с языком
+                recipient_lang = 'en'  # Можно заменить на язык из профиля пользователя
+                translated = translate_message(content, recipient_lang)
+                message.translated_content = translated
             except User.DoesNotExist:
-                recipient_lang = 'en'
-        translated = translate_message(content, recipient_lang)
-        message.translated_content = translated
+                message.translated_content = content
 
         if self.chat_type == 'group':
             message.group_id = self.chat_id
@@ -166,17 +169,20 @@ class ChatConsumer(AsyncWebsocketConsumer):
         try:
             message = Message.objects.get(id=message_id, sender=user)
             message.content = content
-            recipient_lang = 'en'
-            if self.chat_type == 'user':
+
+            if self.chat_type == 'group':
+                # Переводим на английский для групповых чатов
+                translated = translate_message(content, 'en')
+                message.translated_content = translated
+            elif self.chat_type == 'user':
                 try:
                     recipient = User.objects.get(id=self.chat_id)
-                    recipient_lang = 'en'#getattr(recipient.profile, 'language', 'en')
+                    recipient_lang = 'en'  # Можно заменить на язык из профиля
+                    translated = translate_message(content, recipient_lang)
+                    message.translated_content = translated
                 except User.DoesNotExist:
-                    recipient_lang = 'en'
-                translated = translate_message(content, recipient_lang)
-                message.translated_content = translated
-            else:
-                message.translated_content = content  # Для групп перевод не нужен
+                    message.translated_content = content
+
             message.updated_at = timezone.now()
             message.save()
             return message
