@@ -88,8 +88,13 @@ document.addEventListener('DOMContentLoaded', () => {
           div.appendChild(checkImg);
         }
 
+        const isAtBottom = messagesContainer.scrollTop + messagesContainer.clientHeight >= messagesContainer.scrollHeight - 10;
+
         messagesContainer.appendChild(div);
-        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+        if (isAtBottom) {
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
 
         if (!isOwn) {
           observer.observe(div);
