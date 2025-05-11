@@ -90,7 +90,7 @@ def user_activity(request, group_id, user_id):
     end_date = datetime.now().date()
     start_date = end_date - timedelta(days=6)
 
-    # Сообщения
+    # Messages
     total_messages = Message.objects.filter(
         group=group, sender=user, created_at__date__gte=start_date, created_at__date__lte=end_date
     ).count()
@@ -108,7 +108,7 @@ def user_activity(request, group_id, user_id):
     message_data = [message_date_counts.get(label, 0) for label in labels]
     average_messages = sum(message_data) / 7 if message_data else 0
 
-    # Время
+    # Time
     total_duration = GroupActivity.objects.filter(
         group=group, user=user, start_time__date__gte=start_date, start_time__date__lte=end_date, duration__isnull=False
     ).aggregate(total=Sum('duration'))['total'] or timedelta(seconds=0)
@@ -126,7 +126,7 @@ def user_activity(request, group_id, user_id):
     time_data = [time_date_durations.get(label, 0) for label in labels]
     average_time = sum(time_data) / 7 if time_data else 0
 
-    # Посещаемость
+    # Attendance
     daily_attendance = (
         GroupActivity.objects.filter(
             group=group, user=user, start_time__date__gte=start_date, start_time__date__lte=end_date
@@ -141,22 +141,20 @@ def user_activity(request, group_id, user_id):
     average_attendance = sum(attendance_data) / 7 if attendance_data else 0
     total_attendance = sum(attendance_data)
 
-    # Средняя длительность сеанса
+    # Average session duration
     session_durations = GroupActivity.objects.filter(
         group=group, user=user, start_time__date__gte=start_date, start_time__date__lte=end_date, duration__isnull=False
     ).aggregate(avg_duration=Avg('duration'))['avg_duration'] or timedelta(seconds=0)
     average_session_duration = session_durations.total_seconds() / 60 if session_durations else 0
 
-    # Interest как наклон тренда по времени (линейная регрессия)
+    # Interest as slope of time trend (linear regression)
     x_vals = list(range(7))
     y_vals = time_data
-
     n = len(x_vals)
     sum_x = sum(x_vals)
     sum_y = sum(y_vals)
     sum_x2 = sum(x**2 for x in x_vals)
     sum_xy = sum(x * y for x, y in zip(x_vals, y_vals))
-
     denominator = n * sum_x2 - sum_x ** 2
     if denominator == 0:
         interest = 0
@@ -164,6 +162,19 @@ def user_activity(request, group_id, user_id):
         k = (n * sum_xy - sum_x * sum_y) / denominator
         interest = k
 
+    # Activity Indicator: Messages per minute
+    if total_duration_minutes > 0:
+        messages_per_minute = total_messages / total_duration_minutes
+    else:
+        messages_per_minute = float('inf') if total_messages > 0 else 0
+
+    # Categorize user activity
+    if messages_per_minute > 0.5:  # More than 0.5 messages per minute
+        activity_type = 'Active Communicator'
+    elif messages_per_minute < 0.1 and total_duration_minutes > 0:  # Less than 0.1 messages per minute, with some time spent
+        activity_type = 'Passive Reader'
+    else:
+        activity_type = 'Balanced'
 
     context = {
         'group': group,
@@ -176,6 +187,7 @@ def user_activity(request, group_id, user_id):
         'average_attendance': average_attendance,
         'average_session_duration': average_session_duration,
         'interest': interest,
+        'activity_type': activity_type,
         'graph_data': json.dumps({
             'labels': labels,
             'messages': message_data,

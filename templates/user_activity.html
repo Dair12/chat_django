@@ -30,6 +30,9 @@
         <p class="metric">Average Attendance per Day: {{ average_attendance|floatformat:2 }} sessions</p>
         <p class="metric">Average Session Duration: {{ average_session_duration|floatformat:2 }} minutes</p>
       </div>
+      <div class="metric-group activity-type-metrics">
+        <p class="metric">Activity Type: <span class="activity-{{ activity_type|lower|slugify }}">{{ activity_type }}</span></p>
+      </div>
     </div>
     <div class="chart-controls">
       <button id="showMessages" class="chart-btn active">Messages</button>

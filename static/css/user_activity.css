@@ -13,9 +13,7 @@ body {
   background-color: #1a1a1a;
   padding: 20px;
   border-radius: 12px;
-  box-shadow: 0 0 10px rgba(0, 0,
-
-  0, 0.5);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
   text-align: center;
   width: 500px;
 }
@@ -75,11 +73,26 @@ a:hover {
 }
 
 .interest-positive {
-  color: #28a745; /* Зеленый */
+  color: #28a745; /* Green */
   font-weight: bold;
 }
 
 .interest-negative {
-  color: #dc3545; /* Красный */
+  color: #dc3545; /* Red */
+  font-weight: bold;
+}
+
+.activity-active-communicator {
+  color: #007bff; /* Blue */
+  font-weight: bold;
+}
+
+.activity-passive-reader {
+  color: #ffc107; /* Yellow */
+  font-weight: bold;
+}
+
+.activity-balanced {
+  color: #28a745; /* Green */
   font-weight: bold;
 }
