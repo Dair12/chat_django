@@ -1,12 +1,12 @@
 import json
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
-from django.contrib.auth.models import User
-from .models import Message
-from groups.models import Group, GroupMember
-from friends.models import Friend
+# from django.contrib.auth.models import User
+# from .models import Message
+# from groups.models import Group, GroupMember
+# from friends.models import Friend
 from django.utils import timezone
-from .utils.translate import translate_message
+# from .utils.translate import translate_message
 
 class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
@@ -127,6 +127,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     @database_sync_to_async
     def is_authorized(self):
+        from groups.models import GroupMember
+        from friends.models import Friend
         user = self.scope['user']
         if not user.is_authenticated:
             return False
@@ -139,6 +141,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
     
     @database_sync_to_async
     def create_message(self, content):
+        from .models import Message
+        from django.contrib.auth.models import User
+        from .utils.translate import translate_message
         user = self.scope['user']
         message = Message(sender=user, content=content)
 
@@ -165,6 +170,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     @database_sync_to_async
     def update_message(self, message_id, content):
+        from .models import Message
+        from django.contrib.auth.models import User
+        from .utils.translate import translate_message
         user = self.scope['user']
         try:
             message = Message.objects.get(id=message_id, sender=user)
@@ -191,6 +199,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     @database_sync_to_async
     def delete_message(self, message_id):
+        from .models import Message
         user = self.scope['user']
         try:
             message = Message.objects.get(id=message_id, sender=user)
@@ -201,6 +210,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     @database_sync_to_async
     def mark_message_read(self, message_id):
+        from .models import Message
+        from groups.models import GroupMember
         user = self.scope['user']
         try:
             message = Message.objects.get(id=message_id)
